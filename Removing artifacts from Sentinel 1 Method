@@ -1,0 +1,40 @@
+Removing artifacts from Sentinel 1 processed images
+
+1. Download images from
+http://gws-access.ceda.ac.uk/public/defra_eo/sentinel/1/processed/ard/backscatter/2018/
+
+	Note- to speed up the process download multiple files and continue to download files whilst working on images to avoid waiting
+
+2. Open QGIS and drag chosen file in
+
+3. Check to see if there are any artifacts if not move file into checked folder
+
+	Note- Organising folders into months maybe useful for additional processing 
+
+4. Copy the image name and then create a new Layer.
+	To do this Click the Layer header in the top banner of the program >
+	New Shapefile >
+	Click on the three dots at the left hand side of the File Name rectangle and create a new folder e.g. "risf"
+	Paste the image name into the File Name box (you want the same file name as the original image file)
+	Change the drop down menue selection for Geometry Type to Polygon
+	Make sure the Additional dimensions drop down menue has selected EPSG:27700-OSGB 1936 / British National Grid
+	Click Okay
+
+
+5. Right click the new layer which should have appeared in the Layers box (left hand bottom corner) >
+	Selected Toggle Editing
+
+6. Got to the bottom header bar and hover your mouse to find the Add Polygon Feature icon, once found click.
+
+	Note- Add Polygon Feature icon looks like a green area with a yellow star next to it.
+
+7. Find a artifact and click your mouse to start drawing round it
+	Once complete left and then right click the mouse
+	Save as any number (this isn't important)
+
+8. Continue step 7 until all artifacts have been highlighted.
+	
+	Note- to navigate around the map click the hand icon at the top of the page and then return to Add Poylgon Features icon to draw around an area
+
+9. Right click the edited layer (left hand bottom corner again) >
+	Cick save Layer edits
