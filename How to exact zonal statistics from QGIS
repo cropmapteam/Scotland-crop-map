@@ -39,3 +39,10 @@ Click the "..." to the right of the "file name" box and find a suitable location
 Leave all other boxes and click ok.
 
 Open the folder you save the file to and check it's there.
+
+
+
+* Note- You can create a Buffer edge prior to exacting the statistics, however for the actual crop map this will likely be done at an earlier stage.
+To create a buffer click on "Vector" > "Geoprocessing tools" > "Buffer" and select the extend you want to buffer by. You can then view this on top of the original shapefile.
+
+
