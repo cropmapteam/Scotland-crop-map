@@ -1,0 +1,41 @@
+How to exact zonal statistics from QGIS
+12/06/19
+Software : QGIS
+Dataset: Kelso shapefile and sentinel monthly data (multiple months)
+
+
+STEPS
+
+Open QGIS
+Drag in the chosen shape file and all the satellite images you want to use.
+
+Click "Processing" and then "Toolbox"
+Select "Raster Analysis" and within there double click on "Zonal statistics"
+
+A new box will open and in the bottom left corner click "Run as Batch Process" (this allows you to exact zonal statistics from multiple images in one go)
+
+Click the box with "..." below "Raster layer" and select one of the satellite images.
+Click the box with "..." below " Vector layer containing zones" and select the shape file of the area of interest
+Add a reference text to the "Output column prefix" box e.g the month or date the image came from.
+Click the box with "..." below "Statistics to calculate" and select the stats you want to exact.
+To add another satellite image (same area different time point) click the green plus in the left hand top corner
+
+Repeat the process above but replace the Raster layer with the next time point satellite image.
+
+Continue this until you have added in all the satellite images you want to exact zonal statistics for.
+Click "Run" 
+
+Close the Batch Processing - Zonal statistics window
+Right click the shape file and select "Open Attribute Table"
+
+Scroll to the right of the table and see if the zonal statistics have been added, if not something has gone wrong so go back to the beginning.
+
+If the data is there you can now exact the data as a csv file to do statistics on.
+To do this right click the shape file and click export
+Click "Save Features as..."
+A new box will appear 
+Change the format to CSV
+Click the "..." to the right of the "file name" box and find a suitable location for your file, then choose a file name.
+Leave all other boxes and click ok.
+
+Open the folder you save the file to and check it's there.
