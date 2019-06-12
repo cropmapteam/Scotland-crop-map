@@ -1,0 +1,60 @@
+Editing ground truth data to separate into training and validation data
+
+Software: postGRESql and QGIS
+
+
+Reasoning	: fields where there are mixed crops are not suitable for training data therefore we need to determine which fields are mixed to decide what to allocate to training or validation.
+		: Using QGIS to prep the files and use postGRESql to identify fields with more than one crop in, make a new column which excludes these groups and use fields from within this column for training data, randomly select data for validation.
+
+Data: shape file of area you want to use for training and validation (kelso) and LPS land parcels
+
+
+FIRST PART IN QGIS, SECOND IN POSTGRESQL
+Open QGIS 
+Drag in Kelso shapefile and LPS land parcels shapefile
+
+BUFFER STEP
+Buffer known inspection fields (Kelso file)
+Click the "Vector" option at the top of the programme>
+"Geoprocessing tools" >
+"Buffer" >
+Select the known inspection fields file (Kelso) in the "input layers" drop-down menu.
+Select the distance you want for the buffer, we set this to -1 so the buffer was 'inward', this is to remove the potential for joins of adjacent polygons with shared boundaries.
+Click "Run"
+
+
+
+JOIN STEP
+Click the "Processing" option at the top of the programme>
+Toolbox>
+Vector >
+Join attributes by location
+	Input layer -LPIS land parcels
+	Join layer - Buffered file
+
+Geometric predicate
+	intersect
+
+Tick the discard records which could not be joined box. 
+
+REVIEWING STEP
+Review the newly created "Joined layer" and overlay "Buffered" area check to see if they match up.
+
+If there are any large areas which do not line up exclude these from the joined layer.
+To delete specific areas right click "Joined layer" and click "Toggle editing"
+
+A the top of the programme find the "Select areas by features or single click" icon and click it.
+Then click the area you want to remove, once selected click delete.
+
+Save layer edits and turn off layer editing.
+
+POSTGRESQL STEP
+Import into using dbmanager 
+
+For further instructions for postgresql see code.
+
+
+
+
+
+
