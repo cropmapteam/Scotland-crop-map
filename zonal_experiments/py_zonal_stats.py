@@ -8,7 +8,7 @@ from postgres import Postgres
 import shapely.wkb
 import numpy as np
 
-
+#TODO - replace with read from a CSV to remove need for Pg
 def fetch_images():
     images = {}
     pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
@@ -20,7 +20,7 @@ def fetch_images():
 
     return images
 
-
+#TODO - pull from a (partitioned) shapefile rather than Pg
 def fetch_ground_truth_polygons():
     gt_polygons = {}
     pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
@@ -133,6 +133,23 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
     return the_window, affine, window_all_nodata
 
 
+def my_variance(x):
+    """
+    rasterstats does not provide a variance statistic as part of the
+    suite of zonal statistics that it provides so we need to use it`s
+    ability to include user-defined statistics to return the variance
+
+    https://pythonhosted.org/rasterstats/manual.html#user-defined-statistics
+    https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html
+
+    :param x:
+    :return:
+    """
+    return np.var(x)
+
+#TODO - add aoi_coords as params
+#TODO - gt_polygons src needs to be a shapefile i.e. a partition of shapes
+#TODO - images src needs to be something other than Pg i.e. a CSV/picked collection
 def generate_zonal_stats():
     aoi_geo_min_x = 363645.98
     aoi_geo_min_y = 619078.236
@@ -146,7 +163,7 @@ def generate_zonal_stats():
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
         my_writer.writerow(
             ["gt_poly_id", "lcgroup", "lctype", "img_fname", "img_date", "band", "zs_min", "zs_max",
-             "zs_count", "zs_range", "zs_median", "zs_mean", "zs_std"])
+             "zs_count", "zs_range", "zs_median", "zs_mean", "zs_std", "zs_variance"])
 
         # loop through images
         for img_fname in images:
@@ -168,30 +185,37 @@ def generate_zonal_stats():
                     lcgroup = gt_polygons[gid]["lcgroup"]
                     lctype =  gt_polygons[gid]["lctype"]
 
+                    #fetch zonal stats
+                    #variance and is provided by rasterstats user defined statistic
+                    #TODO - only a subset of these mean, range and variance is actually needed
                     zs_b1 = zonal_stats(
                         gt_poly,
                         this_win_b1,
                         affine=this_affine_b1,  # affine needed as we are passing in an ndarray
                         stats=["count", "min", "max", "mean", "median", "std", "range"],  # zonal stats we want
+                        add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
 
                     band = 1
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b1["min"], zs_b1["max"], zs_b1["count"], zs_b1["range"], zs_b1["median"], zs_b1["mean"], zs_b1["std"]
+                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b1["min"], zs_b1["max"], zs_b1["count"], zs_b1["range"], zs_b1["median"], zs_b1["mean"], zs_b1["std"], zs_b1["variance"]
                     ])
 
+                    # fetch zonal stats
+                    # var is variance and is provided by rasterstats user defined statistic
                     zs_b2 = zonal_stats(
                         gt_poly,
                         this_win_b2,
                         affine=this_affine_b2,  # affine needed as we are passing in an ndarray
                         stats=["count", "min", "max", "mean", "median", "std", "range"],  # zonal stats we want
+                        add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
 
                     band = 2
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b2["min"], zs_b2["max"], zs_b2["count"], zs_b2["range"], zs_b2["median"], zs_b2["mean"], zs_b2["std"]
+                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b2["min"], zs_b2["max"], zs_b2["count"], zs_b2["range"], zs_b2["median"], zs_b2["mean"], zs_b2["std"], zs_b2["variance"]
                     ])
             else:
                 print("Skipped {} since window seemed to be all nodata".format(img_fname))
