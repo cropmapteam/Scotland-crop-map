@@ -8,7 +8,7 @@ from postgres import Postgres
 import shapely.wkb
 import numpy as np
 
-#TODO - replace with read from a CSV to remove need for Pg
+
 def fetch_images():
     images = {}
     pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
@@ -21,7 +21,7 @@ def fetch_images():
     return images
 
 
-def fetch_images_from_csv(csv_fname="/home/james/Downloads/some_images_meta.csv"):
+def fetch_image_metadata_from_csv(md_csv_fname):
     """
     from view dump image metadata to csv by in pgadmin4 running this query
 
@@ -29,17 +29,17 @@ def fetch_images_from_csv(csv_fname="/home/james/Downloads/some_images_meta.csv"
 
     and then save to a csv
 
-    :param csv_fname:
-    :return:
+    :param md_csv_fname:
+    :return: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
     """
-    images = {}
-    if os.path.exists(csv_fname):
-        with open(csv_fname, "r") as inpf:
+    image_metadata = {}
+    if os.path.exists(md_csv_fname):
+        with open(md_csv_fname, "r") as inpf:
             my_reader = csv.DictReader(inpf)
             for r in my_reader:
-                images[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
+                image_metadata[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
 
-    return images
+    return image_metadata
 
 
 
@@ -171,20 +171,19 @@ def my_variance(x):
     """
     return np.var(x)
 
-#TODO - add aoi_coords as params
+
 #TODO - gt_polygons src needs to be a shapefile i.e. a partition of shapes
-#TODO - images src needs to be something other than Pg i.e. a CSV/picked collection
-def generate_zonal_stats():
-    aoi_geo_min_x = 363645.98
-    aoi_geo_min_y = 619078.236
-    aoi_geo_max_x = 380358.43
-    aoi_geo_max_y = 636682.04
+def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata):
+    """
 
+    :param aoi_geo_min_x: AOI min x
+    :param aoi_geo_min_y: AOI min y
+    :param aoi_geo_max_x: AOI max x
+    :param aoi_geo_max_y: AOI max y
+    :param image_metadata: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
+    :return:
+    """
     gt_polygons = fetch_ground_truth_polygons()
-
-    # pull image metadata from a csv rather than a Pg db dependency
-    #images = fetch_images()
-    images = fetch_images_from_csv()
 
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
@@ -193,11 +192,11 @@ def generate_zonal_stats():
              "zs_count", "zs_range", "zs_median", "zs_mean", "zs_std", "zs_variance"])
 
         # loop through images
-        for img_fname in images:
+        for img_fname in image_metadata:
 
-            image_day = images[img_fname][0]
-            image_month = images[img_fname][1]
-            image_year = images[img_fname][2]
+            image_day = image_metadata[img_fname][0]
+            image_month = image_metadata[img_fname][1]
+            image_year = image_metadata[img_fname][2]
 
             image_date = date(int(image_year), int(image_month), int(image_day))
 
@@ -313,8 +312,15 @@ def build_ml_labels_features(fname="/home/james/Desktop/zonal_stats.csv"):
 
 
 def main():
+    aoi_geo_min_x = 363645.98
+    aoi_geo_min_y = 619078.236
+    aoi_geo_max_x = 380358.43
+    aoi_geo_max_y = 636682.04
+    md_csv_fname = "/home/james/Downloads/some_images_meta.csv"
+    image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
+
     print("[1] generating zonal stats")
-    generate_zonal_stats()
+    generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata)
 
     print("[2] validating zonal stats")
     validate_zonal_stats()
