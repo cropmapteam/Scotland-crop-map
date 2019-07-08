@@ -4,11 +4,30 @@ from datetime import date
 import rasterio
 from rasterio.windows import Window
 from rasterstats import zonal_stats
-from postgres import Postgres
 import shapely.wkb
 import numpy as np
 import fiona
-from shapely.geometry import shape
+from shapely.geometry import shape, Polygon
+
+
+def get_aoi_from_shapefile(shp_fname, buffer_d=100):
+    """
+    from a shapefile obtain it`s buffered extent as an AOI
+
+    :param shp_fname:
+    :param buffer_d:
+    :return:
+    """
+    aoi_min_x, aoi_min_y, aoi_max_x, aoi_max_y = None, None, None, None
+
+    if os.path.exists(shp_fname):
+        with fiona.open(shp_fname, "r") as shp_src:
+            (min_x, min_y, max_x, max_y) = shp_src.bounds
+            shp_src_extent = Polygon([(min_x, min_y), (max_x, min_y), (max_x, max_y), (min_x, max_y)])
+            aoi = shp_src_extent.buffer(buffer_d)
+            (aoi_min_x, aoi_min_y, aoi_max_x, aoi_max_y) = aoi.bounds
+
+    return aoi_min_x, aoi_min_y, aoi_max_x, aoi_max_y
 
 
 def fetch_image_metadata_from_csv(md_csv_fname):
@@ -292,13 +311,12 @@ def build_ml_labels_features(fname="/home/james/Desktop/zonal_stats.csv"):
 
 
 def main():
-    aoi_geo_min_x = 363645.98
-    aoi_geo_min_y = 619078.236
-    aoi_geo_max_x = 380358.43
-    aoi_geo_max_y = 636682.04
     md_csv_fname = "/home/james/Downloads/some_images_meta.csv"
     image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
     zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
+    # get the AOI of the zones shapefile - this is used to create windows in the rasters
+    # we are using a default buffer of 100m
+    aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
 
     print("[1] generating zonal stats")
     generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
