@@ -4,7 +4,6 @@ from datetime import date
 import rasterio
 from rasterio.windows import Window
 from rasterstats import zonal_stats
-import shapely.wkb
 import numpy as np
 import fiona
 from shapely.geometry import shape, Polygon
