@@ -210,9 +210,6 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
                     lcgroup = gt_polygons[gid]["lcgroup"]
                     lctype =  gt_polygons[gid]["lctype"]
 
-                    #fetch zonal stats
-                    #variance and is provided by rasterstats user defined statistic
-                    #TODO - only a subset of these mean, range and variance is actually needed
                     zs_b1 = zonal_stats(
                         gt_poly,
                         this_win_b1,
