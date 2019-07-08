@@ -20,6 +20,29 @@ def fetch_images():
 
     return images
 
+
+def fetch_images_from_csv(csv_fname="/home/james/Downloads/some_images_meta.csv"):
+    """
+    from view dump image metadata to csv by in pgadmin4 running this query
+
+    SELECT path_to_image, image_day, image_month, image_year FROM geocrud.image_bounds_meta_isect_w_gt;
+
+    and then save to a csv
+
+    :param csv_fname:
+    :return:
+    """
+    images = {}
+    if os.path.exists(csv_fname):
+        with open(csv_fname, "r") as inpf:
+            my_reader = csv.DictReader(inpf)
+            for r in my_reader:
+                images[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
+
+    return images
+
+
+
 #TODO - pull from a (partitioned) shapefile rather than Pg
 def fetch_ground_truth_polygons():
     gt_polygons = {}
@@ -99,6 +122,7 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
         this_window = Window(aoi_img_min_col, aoi_img_min_row - aoi_height, aoi_width, aoi_height)
         the_window = src.read(band, window=this_window)
 
+        #TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
         # possibly unreliable test to check if the returned window is all nodata values i.e. the part of
         # the image contains no RS data
         first = the_window[0][0]
@@ -157,7 +181,10 @@ def generate_zonal_stats():
     aoi_geo_max_y = 636682.04
 
     gt_polygons = fetch_ground_truth_polygons()
-    images = fetch_images()
+
+    # pull image metadata from a csv rather than a Pg db dependency
+    #images = fetch_images()
+    images = fetch_images_from_csv()
 
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
@@ -243,7 +270,7 @@ def validate_zonal_stats(fname="/home/james/Desktop/zonal_stats.csv"):
             for o in odd:
                 print(o, len(odd[o]))
 
-
+#TODO - needs modified so that structure is in the form that Beata needs to ingest into R
 def build_ml_labels_features(fname="/home/james/Desktop/zonal_stats.csv"):
     labels_d, features_d = None, None
 
