@@ -7,18 +7,8 @@ from rasterstats import zonal_stats
 from postgres import Postgres
 import shapely.wkb
 import numpy as np
-
-
-def fetch_images():
-    images = {}
-    pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
-    db = Postgres(pg_conn_str)
-    sql = "SELECT * FROM geocrud.image_bounds_meta_isect_w_gt"
-    rs = db.all(sql)
-    for r in rs:
-        images[r.path_to_image] = [r.image_day, r.image_month, r.image_year]
-
-    return images
+import fiona
+from shapely.geometry import shape
 
 
 def fetch_image_metadata_from_csv(md_csv_fname):
@@ -42,27 +32,22 @@ def fetch_image_metadata_from_csv(md_csv_fname):
     return image_metadata
 
 
+def fetch_zonal_polygons_from_shapefile(shp_fname):
+    zonal_polygons = {}
+    if os.path.exists(shp_fname):
+        with fiona.open(shp_fname, "r") as shp_src:
+            for feature in shp_src:
+                gid = feature["properties"]["GID"]
+                geom = shape(feature["geometry"])
+                lcgroup = feature["properties"]["LCGROUP"]
+                lctype = feature["properties"]["LCTYPE"]
+                zonal_polygons[gid] = {
+                    "geom": geom,
+                    "lcgroup": lcgroup,
+                    "lctype": lctype
+                }
 
-#TODO - pull from a (partitioned) shapefile rather than Pg
-def fetch_ground_truth_polygons():
-    gt_polygons = {}
-    pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
-    db = Postgres(pg_conn_str)
-    sql = "SELECT * FROM geocrud.ground_truth_v5_2018_inspection_kelso"
-    rs = db.all(sql)
-
-    for r in rs:
-        gid = r.gid
-        lcgroup = r.lcgroup
-        lctype = r.lctype
-        geom = shapely.wkb.loads(r.geom, hex=True)
-        gt_polygons[gid] = {
-            "geom": geom,
-            "lcgroup": lcgroup,
-            "lctype": lctype
-        }
-
-    return gt_polygons
+    return zonal_polygons
 
 
 def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1, dbg=False):
@@ -172,8 +157,7 @@ def my_variance(x):
     return np.var(x)
 
 
-#TODO - gt_polygons src needs to be a shapefile i.e. a partition of shapes
-def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata):
+def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
     """
 
     :param aoi_geo_min_x: AOI min x
@@ -183,7 +167,7 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
     :param image_metadata: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
     :return:
     """
-    gt_polygons = fetch_ground_truth_polygons()
+    gt_polygons = fetch_zonal_polygons_from_shapefile(shp_fname=zones_shp_fname)
 
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
@@ -314,9 +298,10 @@ def main():
     aoi_geo_max_y = 636682.04
     md_csv_fname = "/home/james/Downloads/some_images_meta.csv"
     image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
+    zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
 
     print("[1] generating zonal stats")
-    generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata)
+    generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
 
     print("[2] validating zonal stats")
     validate_zonal_stats()
