@@ -188,8 +188,7 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
         my_writer.writerow(
-            ["gt_poly_id", "lcgroup", "lctype", "img_fname", "img_date", "band", "zs_min", "zs_max",
-             "zs_count", "zs_range", "zs_median", "zs_mean", "zs_std", "zs_variance"])
+            ["gt_poly_id", "lcgroup", "lctype", "img_fname", "img_date", "band", "zs_count", "zs_mean", "zs_range", "zs_variance"])
 
         # loop through images
         for img_fname in image_metadata:
@@ -218,14 +217,14 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
                         gt_poly,
                         this_win_b1,
                         affine=this_affine_b1,  # affine needed as we are passing in an ndarray
-                        stats=["count", "min", "max", "mean", "median", "std", "range"],  # zonal stats we want
+                        stats=["count", "mean", "range"],  # zonal stats we want
                         add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
 
                     band = 1
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b1["min"], zs_b1["max"], zs_b1["count"], zs_b1["range"], zs_b1["median"], zs_b1["mean"], zs_b1["std"], zs_b1["variance"]
+                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b1["count"], zs_b1["mean"], zs_b1["range"], zs_b1["variance"]
                     ])
 
                     # fetch zonal stats
@@ -234,14 +233,14 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
                         gt_poly,
                         this_win_b2,
                         affine=this_affine_b2,  # affine needed as we are passing in an ndarray
-                        stats=["count", "min", "max", "mean", "median", "std", "range"],  # zonal stats we want
+                        stats=["count", "mean", "range"],  # zonal stats we want
                         add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
 
                     band = 2
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b2["min"], zs_b2["max"], zs_b2["count"], zs_b2["range"], zs_b2["median"], zs_b2["mean"], zs_b2["std"], zs_b2["variance"]
+                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b2["count"], zs_b2["mean"], zs_b2["range"], zs_b2["variance"]
                     ])
             else:
                 print("Skipped {} since window seemed to be all nodata".format(img_fname))
