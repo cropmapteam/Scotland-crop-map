@@ -273,46 +273,99 @@ def validate_zonal_stats(fname="/home/james/Desktop/zonal_stats.csv"):
             for o in odd:
                 print(o, len(odd[o]))
 
-#TODO - needs modified so that structure is in the form that Beata needs to ingest into R
-def build_ml_labels_features(fname="/home/james/Desktop/zonal_stats.csv"):
-    labels_d, features_d = None, None
 
-    if os.path.exists(fname):
+def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
+    """
+    write the zonal stats to a form that is needed for R
 
-        labels_d = {}
-        features_d = {}
+    :param zs_csv_fname:
+    :param csv_for_ml_fname:
+    :return:
+    """
+    all_dates = []
 
-        with open(fname, "r") as inpf:
+    if os.path.exists(zs_csv_fname):
+        out_data = {}
+        with open(zs_csv_fname, "r") as inpf:
             my_reader = csv.DictReader(inpf)
             for r in my_reader:
                 zs_count = r["zs_count"]
+                if zs_count != 0:
 
-                # for now, skip cases where image was not read correctly
-                # for some reason
-
-                if zs_count != '0':
                     gt_poly_id = int(r["gt_poly_id"])
-                    gt_lcgroup = r["lcgroup"]
-                    gt_lctype = r["lctype"]
+                    gt_fid_1 = r["gt_fid_1"]
+                    lcgroup = r["lcgroup"]
+                    lctype = r["lctype"]
+                    area = r["area"]
+                    img_date = r["img_date"]
+                    if img_date not in all_dates:
+                        all_dates.append(img_date)
                     band = r["band"]
                     zs_mean = r["zs_mean"]
-                    gt_img_date = r["img_date"]
-                    # print(gt_poly_id, gt_lcgroup, gt_lctype, gt_img_date, band, zs_mean)
+                    zs_range = r["zs_range"]
+                    zs_variance = r["zs_variance"]
 
-                    if gt_poly_id not in labels_d:
-                        labels_d[gt_poly_id] = {"lcgroup": gt_lcgroup, "lctype": gt_lctype}
+                    if gt_poly_id not in out_data:
+                        out_data[gt_poly_id] = {
+                            "gt_fid_1": gt_fid_1,
+                            "lcgroup": lcgroup,
+                            "lctype": lctype,
+                            "area": area,
+                            "band_data": {
+                                1: {},
+                                2: {}
+                            }
+                        }
 
-                    if gt_poly_id in features_d:
-                        if gt_img_date in features_d[gt_poly_id]:
-                            features_d[gt_poly_id][gt_img_date][band] = zs_mean
-                        else:
-                            features_d[gt_poly_id][gt_img_date] = {"1": None, "2": None}
-                            features_d[gt_poly_id][gt_img_date][band] = zs_mean
-                    else:
-                        features_d[gt_poly_id] = {gt_img_date: {"1": None, "2": None}}
-                        features_d[gt_poly_id][gt_img_date][band] = zs_mean
+                    out_data[gt_poly_id]["band_data"][int(band)][img_date] = [zs_mean, zs_range, zs_variance]
 
-    return labels_d, features_d
+        indexed_all_dates = {}
+        idx = 1
+        for i in sorted(all_dates):
+            indexed_all_dates[idx] = i
+            idx += 1
+
+        header = ["gt_poly_id", "gt_fid_1", "lcgroup", "lctype", "area"]
+        for b in (1, 2):
+            for i in sorted(indexed_all_dates.keys()):
+                datestamp = indexed_all_dates[i]
+                header.append("_".join([datestamp, str(b), "mean"]))
+                header.append("_".join([datestamp, str(b), "range"]))
+                header.append("_".join([datestamp, str(b), "variance"]))
+
+        with open(csv_for_ml_fname, "w") as outpf:
+            my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+            my_writer.writerow(header)
+
+            for gt_poly_id in sorted(out_data.keys()):
+                ml_data = [gt_poly_id]
+                fid_1 = out_data[gt_poly_id]["gt_fid_1"]
+                ml_data.append(fid_1)
+
+                lcgroup = out_data[gt_poly_id]["lcgroup"]
+                ml_data.append(lcgroup)
+
+                lctype = out_data[gt_poly_id]["lctype"]
+                ml_data.append(lctype)
+
+                area = out_data[gt_poly_id]["area"]
+                ml_data.append(area)
+
+                for b in (1, 2):
+                    band_data = out_data[gt_poly_id]["band_data"][b]
+                    for i in sorted(indexed_all_dates.keys()):
+                        datestamp = indexed_all_dates[i]
+                        zs_mean = None
+                        zs_range = None
+                        zs_variance = None
+                        if datestamp in band_data:
+                            zs_mean = band_data[datestamp][0]
+                            zs_range = band_data[datestamp][1]
+                            zs_variance = band_data[datestamp][2]
+                        ml_data.append(zs_mean)
+                        ml_data.append(zs_range)
+                        ml_data.append(zs_variance)
+                my_writer.writerow(ml_data)
 
 
 def main():
@@ -326,32 +379,14 @@ def main():
     print("[1] generating zonal stats")
     generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
 
-    print("[2] validating zonal stats")
-    validate_zonal_stats()
+    #TODO do we still want to validate zonal stats?
+    # print("[3] validating zonal stats")
+    # validate_zonal_stats()
 
-    print("[3] build labels and features")
-    labels, features = build_ml_labels_features()
-
-    id = 1
-
-    if (labels is not None) and (features is not None):
-        print("have built labels and features")
-
-        with open("/home/james/Desktop/sentinel_crop_data_for_ml.csv", "w") as outpf:
-            my_writer = csv.writer(outpf, delimiter=",", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-            my_writer.writerow(["id", "gt_poly_id", "lctype", "lcgroup", "sample_date", "band_1_mean", "band_2_mean"])
-
-            for gt_poly_id in sorted(features.keys()):
-                lctype = labels[gt_poly_id]["lctype"]
-                lcgroup = labels[gt_poly_id]["lcgroup"]
-                for sample_date in features[gt_poly_id]:
-                    band_1_measure = features[gt_poly_id][sample_date]["1"]
-                    band_2_measure = features[gt_poly_id][sample_date]["2"]
-                    my_writer.writerow([id, gt_poly_id, lctype, lcgroup, sample_date, band_1_measure, band_2_measure])
-                    id += 1
-
-    else:
-        print("both labels and features are empty")
+    print("[2] reformatting zonal stats to csv form needed for R")
+    zs_csv_fname = "/home/james/Desktop/zonal_stats.csv"
+    csv_for_ml_fname = "/home/james/Desktop/ml_data.csv"
+    write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname)
 
 
 if __name__ == "__main__":
