@@ -56,11 +56,13 @@ def fetch_zonal_polygons_from_shapefile(shp_fname):
         with fiona.open(shp_fname, "r") as shp_src:
             for feature in shp_src:
                 gid = feature["properties"]["GID"]
+                fid_1 = feature["properties"]["FID_1"]
                 geom = shape(feature["geometry"])
                 lcgroup = feature["properties"]["LCGROUP"]
                 lctype = feature["properties"]["LCTYPE"]
                 zonal_polygons[gid] = {
                     "geom": geom,
+                    "fid_1": fid_1,
                     "lcgroup": lcgroup,
                     "lctype": lctype
                 }
@@ -175,6 +177,7 @@ def my_variance(x):
     return np.var(x)
 
 
+#TODO need to include zonal poly area as part of the zonal stats
 def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
     """
 
@@ -190,7 +193,7 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
         my_writer.writerow(
-            ["gt_poly_id", "lcgroup", "lctype", "img_fname", "img_date", "band", "zs_count", "zs_mean", "zs_range", "zs_variance"])
+            ["gt_poly_id", "gt_fid_1", "lcgroup", "lctype", "img_fname", "img_date", "band", "zs_count", "zs_mean", "zs_range", "zs_variance"])
 
         # loop through images
         for img_fname in image_metadata:
@@ -209,8 +212,9 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
                 # in each image, loop through gt polygons
                 for gid in gt_polygons:
                     gt_poly = gt_polygons[gid]["geom"]
+                    gt_fid_1 = gt_polygons[gid]["fid_1"]
                     lcgroup = gt_polygons[gid]["lcgroup"]
-                    lctype =  gt_polygons[gid]["lctype"]
+                    lctype = gt_polygons[gid]["lctype"]
 
                     zs_b1 = zonal_stats(
                         gt_poly,
@@ -223,7 +227,7 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
 
                     band = 1
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b1["count"], zs_b1["mean"], zs_b1["range"], zs_b1["variance"]
+                        gid, gt_fid_1, lcgroup, lctype, img_fname, image_date, band, zs_b1["count"], zs_b1["mean"], zs_b1["range"], zs_b1["variance"]
                     ])
 
                     # fetch zonal stats
@@ -239,7 +243,7 @@ def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_ma
 
                     band = 2
                     my_writer.writerow([
-                        gid, lcgroup, lctype, img_fname, image_date, band, zs_b2["count"], zs_b2["mean"], zs_b2["range"], zs_b2["variance"]
+                        gid, gt_fid_1, lcgroup, lctype, img_fname, image_date, band, zs_b2["count"], zs_b2["mean"], zs_b2["range"], zs_b2["variance"]
                     ])
             else:
                 print("Skipped {} since window seemed to be all nodata".format(img_fname))
