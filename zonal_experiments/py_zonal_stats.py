@@ -179,7 +179,6 @@ def my_variance(x):
     return np.var(x)
 
 
-#TODO need to include zonal poly area as part of the zonal stats
 def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
     """
 
