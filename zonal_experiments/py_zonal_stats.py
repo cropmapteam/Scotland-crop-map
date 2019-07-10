@@ -179,17 +179,17 @@ def my_variance(x):
     return np.var(x)
 
 
-def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
+#def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
+def generate_zonal_stats(image_metadata, zones_shp_fname):
     """
 
-    :param aoi_geo_min_x: AOI min x
-    :param aoi_geo_min_y: AOI min y
-    :param aoi_geo_max_x: AOI max x
-    :param aoi_geo_max_y: AOI max y
-    :param image_metadata: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
+    :param image_metadata:
+    :param zones_shp_fname:
     :return:
     """
+
     gt_polygons = fetch_zonal_polygons_from_shapefile(shp_fname=zones_shp_fname)
+    aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
 
     with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
@@ -374,10 +374,11 @@ def main():
     zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
     # get the AOI of the zones shapefile - this is used to create windows in the rasters
     # we are using a default buffer of 100m
-    aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
+    #aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
 
     print("[1] generating zonal stats")
-    generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
+    #generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
+    generate_zonal_stats(image_metadata, zones_shp_fname)
 
     #TODO do we still want to validate zonal stats?
     # print("[3] validating zonal stats")
