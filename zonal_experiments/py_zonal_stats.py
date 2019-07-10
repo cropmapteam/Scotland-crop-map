@@ -179,8 +179,7 @@ def my_variance(x):
     return np.var(x)
 
 
-#def generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname):
-def generate_zonal_stats(image_metadata, zones_shp_fname):
+def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     """
 
     :param image_metadata:
@@ -191,7 +190,9 @@ def generate_zonal_stats(image_metadata, zones_shp_fname):
     gt_polygons = fetch_zonal_polygons_from_shapefile(shp_fname=zones_shp_fname)
     aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
 
-    with open("/home/james/Desktop/zonal_stats.csv", "w") as outpf:
+    zs_fname = os.path.join(output_path, (os.path.split(zones_shp_fname)[-1]).replace(".shp", "_zonal_stats.csv"))
+
+    with open(zs_fname, "w") as outpf:
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
         my_writer.writerow(
             ["gt_poly_id", "gt_fid_1", "lcgroup", "lctype", "area", "img_fname", "img_date", "band", "zs_count", "zs_mean", "zs_range", "zs_variance"])
@@ -250,28 +251,30 @@ def generate_zonal_stats(image_metadata, zones_shp_fname):
             else:
                 print("Skipped {} since window seemed to be all nodata".format(img_fname))
 
+    return zs_fname
 
-def validate_zonal_stats(fname="/home/james/Desktop/zonal_stats.csv"):
-    if os.path.exists(fname):
-        odd = {}
 
-        with open(fname, "r") as inpf:
-            my_reader = csv.DictReader(inpf)
-            for r in my_reader:
-                zs_count = r["zs_count"]
-                if zs_count == '0':
-                    img_fname = r["img_fname"]
-                    gt_poly_id = r["gt_poly_id"]
-                    if img_fname in odd:
-                        if gt_poly_id not in odd[img_fname]:
-                            odd[img_fname].append(gt_poly_id)
-                    else:
-                        odd[img_fname] = [gt_poly_id]
-
-        if len(odd) > 0:
-            print("Validation found some problems:")
-            for o in odd:
-                print(o, len(odd[o]))
+# def validate_zonal_stats(fname="/home/james/Desktop/zonal_stats.csv"):
+#     if os.path.exists(fname):
+#         odd = {}
+#
+#         with open(fname, "r") as inpf:
+#             my_reader = csv.DictReader(inpf)
+#             for r in my_reader:
+#                 zs_count = r["zs_count"]
+#                 if zs_count == '0':
+#                     img_fname = r["img_fname"]
+#                     gt_poly_id = r["gt_poly_id"]
+#                     if img_fname in odd:
+#                         if gt_poly_id not in odd[img_fname]:
+#                             odd[img_fname].append(gt_poly_id)
+#                     else:
+#                         odd[img_fname] = [gt_poly_id]
+#
+#         if len(odd) > 0:
+#             print("Validation found some problems:")
+#             for o in odd:
+#                 print(o, len(odd[o]))
 
 
 def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
@@ -370,24 +373,24 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
 
 def main():
     md_csv_fname = "/home/james/Downloads/some_images_meta.csv"
-    image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
     zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
-    # get the AOI of the zones shapefile - this is used to create windows in the rasters
-    # we are using a default buffer of 100m
-    #aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
+    output_path = "/home/james/geocrud/zonal_stats"
 
+    # get image metadata which determines which images we collect zonal stats from
+    image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
+
+    # generate zonal stats
     print("[1] generating zonal stats")
-    #generate_zonal_stats(aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, image_metadata, zones_shp_fname)
-    generate_zonal_stats(image_metadata, zones_shp_fname)
+    zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
+
+    # reformat the zonal stats csv into the form needed for R
+    print("[2] reformatting zonal stats to csv form needed for R")
+    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
+    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
     #TODO do we still want to validate zonal stats?
     # print("[3] validating zonal stats")
     # validate_zonal_stats()
-
-    print("[2] reformatting zonal stats to csv form needed for R")
-    zs_csv_fname = "/home/james/Desktop/zonal_stats.csv"
-    csv_for_ml_fname = "/home/james/Desktop/ml_data.csv"
-    write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname)
 
 
 if __name__ == "__main__":
