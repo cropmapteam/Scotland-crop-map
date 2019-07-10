@@ -389,6 +389,36 @@ def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, outpu
     # validate_zonal_stats()
 
 
+def mp_fetch_zonal_stats_for_shapefile(job_params):
+    """
+
+    version of fetch_zonal_stats_for_shapefile() to have list of params
+    mapped to it in a processing pool
+
+    :param job_params: params of fetch_zonal_stats_for_shapefile() as a list
+    :return:
+    """
+    zones_shp_fname = job_params[0]
+    image_metadata_fname = job_params[1]
+    output_path = job_params[2]
+
+    # get image metadata which determines which images we collect zonal stats from
+    image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
+
+    # generate zonal stats
+    print("[1] generating zonal stats for {}".format(zones_shp_fname))
+    zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
+
+    # reformat the zonal stats csv into the form needed for R
+    print("[2] reformatting zonal stats to csv form needed for R")
+    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
+    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
+
+    #TODO do we still want to validate zonal stats?
+    # print("[3] validating zonal stats")
+    # validate_zonal_stats()
+
+
 def main():
     zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
     image_metadata_fname = "/home/james/Downloads/some_images_meta.csv"
