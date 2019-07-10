@@ -371,16 +371,12 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
                 my_writer.writerow(ml_data)
 
 
-def main():
-    md_csv_fname = "/home/james/Downloads/some_images_meta.csv"
-    zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
-    output_path = "/home/james/geocrud/zonal_stats"
-
+def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path):
     # get image metadata which determines which images we collect zonal stats from
-    image_metadata = fetch_image_metadata_from_csv(md_csv_fname)
+    image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
 
     # generate zonal stats
-    print("[1] generating zonal stats")
+    print("[1] generating zonal stats for {}".format(zones_shp_fname))
     zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
 
     # reformat the zonal stats csv into the form needed for R
@@ -391,6 +387,14 @@ def main():
     #TODO do we still want to validate zonal stats?
     # print("[3] validating zonal stats")
     # validate_zonal_stats()
+
+
+def main():
+    zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
+    image_metadata_fname = "/home/james/Downloads/some_images_meta.csv"
+    output_path = "/home/james/geocrud/zonal_stats"
+
+    fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
 
 
 if __name__ == "__main__":
