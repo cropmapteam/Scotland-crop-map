@@ -6,7 +6,9 @@ from rasterio.windows import Window
 from rasterstats import zonal_stats
 import numpy as np
 import fiona
+import shapely
 from shapely.geometry import shape, Polygon
+from shapely.wkt import loads
 
 
 def get_aoi_from_shapefile(shp_fname, buffer_d=100):
@@ -28,24 +30,61 @@ def get_aoi_from_shapefile(shp_fname, buffer_d=100):
 
     return aoi_min_x, aoi_min_y, aoi_max_x, aoi_max_y
 
+# TODO restrict images to just those that isect with shp extent
+# def fetch_image_metadata_from_csv(md_csv_fname):
+#     """
+#     from view dump image metadata to csv by in pgadmin4 running this query
+#
+#     SELECT path_to_image, image_day, image_month, image_year FROM geocrud.image_bounds_meta_isect_w_gt;
+#
+#     and then save to a csv
+#
+#     :param md_csv_fname:
+#     :return: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
+#     """
+#     image_metadata = {}
+#     if os.path.exists(md_csv_fname):
+#         with open(md_csv_fname, "r") as inpf:
+#             my_reader = csv.DictReader(inpf)
+#             for r in my_reader:
+#                 image_metadata[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
+#
+#     return image_metadata
 
-def fetch_image_metadata_from_csv(md_csv_fname):
-    """
-    from view dump image metadata to csv by in pgadmin4 running this query
 
-    SELECT path_to_image, image_day, image_month, image_year FROM geocrud.image_bounds_meta_isect_w_gt;
+def fetch_image_metadata_from_csv_filtered(md_csv_fname, zones_shp_fname, buffer_d=100):
 
-    and then save to a csv
+    image_metadata = None
+    all_record_count, filtered_record_count = 0, 0
 
-    :param md_csv_fname:
-    :return: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
-    """
-    image_metadata = {}
-    if os.path.exists(md_csv_fname):
-        with open(md_csv_fname, "r") as inpf:
-            my_reader = csv.DictReader(inpf)
-            for r in my_reader:
-                image_metadata[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
+    if os.path.exists(zones_shp_fname):
+        aoi_geom = None
+
+        if os.path.exists(zones_shp_fname):
+            with fiona.open(zones_shp_fname, "r") as shp_src:
+                (min_x, min_y, max_x, max_y) = shp_src.bounds
+                shp_src_extent = Polygon([(min_x, min_y), (max_x, min_y), (max_x, max_y), (min_x, max_y)])
+                aoi_geom = shp_src_extent.buffer(buffer_d)
+
+        if aoi_geom is not None:
+            image_metadata = {}
+
+            if os.path.exists(md_csv_fname):
+                with open(md_csv_fname, "r") as inpf:
+                    my_reader = csv.DictReader(inpf)
+                    for r in my_reader:
+                        path_to_image = r["path_to_image"]
+                        image_day = r["image_day"]
+                        image_month = r["image_month"]
+                        image_year = r["image_year"]
+                        geom_wkt = r["geom_wkt"]
+                        md_geom = shapely.wkt.loads(geom_wkt)
+                        if md_geom.intersects(aoi_geom):
+                            image_metadata[path_to_image] = [image_day, image_month, image_year]
+                            filtered_record_count += 1
+                        all_record_count += 1
+
+    #print("{}/{} images intersected with the shapefile".format(filtered_record_count, all_record_count))
 
     return image_metadata
 
@@ -129,9 +168,9 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
         this_window = Window(aoi_img_min_col, aoi_img_min_row - aoi_height, aoi_width, aoi_height)
         the_window = src.read(band, window=this_window)
 
-        #TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
-        # possibly unreliable test to check if the returned window is all nodata values i.e. the part of
-        # the image contains no RS data
+        # TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
+        #  possibly unreliable test to check if the returned window is all nodata values i.e. the part of
+        #   the image contains no RS data
         first = the_window[0][0]
         last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
         if np.isnan(first) and np.isnan(last):
@@ -373,7 +412,9 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
 
 def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path):
     # get image metadata which determines which images we collect zonal stats from
-    image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
+    #image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
+
+    image_metadata = fetch_image_metadata_from_csv_filtered(image_metadata_fname, zones_shp_fname, buffer_d=100)
 
     # generate zonal stats
     print("[1] generating zonal stats for {}".format(zones_shp_fname))
@@ -384,9 +425,9 @@ def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, outpu
     csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
-    #TODO do we still want to validate zonal stats?
-    # print("[3] validating zonal stats")
-    # validate_zonal_stats()
+    # TODO do we still want to validate zonal stats?
+    #  print("[3] validating zonal stats")
+    #   validate_zonal_stats()
 
 
 def mp_fetch_zonal_stats_for_shapefile(job_params):
@@ -403,7 +444,8 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     output_path = job_params[2]
 
     # get image metadata which determines which images we collect zonal stats from
-    image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
+    #image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
+    image_metadata = fetch_image_metadata_from_csv_filtered(image_metadata_fname, zones_shp_fname, buffer_d=100)
 
     # generate zonal stats
     print("[1] generating zonal stats for {}".format(zones_shp_fname))
@@ -414,14 +456,14 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
-    #TODO do we still want to validate zonal stats?
-    # print("[3] validating zonal stats")
-    # validate_zonal_stats()
+    # TODO do we still want to validate zonal stats?
+    #  print("[3] validating zonal stats")
+    #   validate_zonal_stats()
 
 
 def main():
     zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
-    image_metadata_fname = "/home/james/Downloads/some_images_meta.csv"
+    image_metadata_fname = "data/image_bounds_meta.csv"
     output_path = "/home/james/geocrud/zonal_stats"
 
     fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
