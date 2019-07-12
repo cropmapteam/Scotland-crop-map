@@ -315,7 +315,8 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
 #             for o in odd:
 #                 print(o, len(odd[o]))
 
-
+# TODO the writing of the csv to the form needed to the R ml should be done in the main generate_zonal_stats func
+#  rather than as a repeated write, read and then re-write as this
 def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
     """
     write the zonal stats to a form that is needed for R
@@ -367,13 +368,20 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
             indexed_all_dates[idx] = i
             idx += 1
 
-        header = ["gt_poly_id", "gt_fid_1", "lcgroup", "lctype", "area"]
+        header = ["id", "fid_1", "lcgroup", "lctype", "area"]
+        # band1 is VV
+        # band2 is VH
         for b in (1, 2):
             for i in sorted(indexed_all_dates.keys()):
                 datestamp = indexed_all_dates[i]
-                header.append("_".join([datestamp, str(b), "mean"]))
-                header.append("_".join([datestamp, str(b), "range"]))
-                header.append("_".join([datestamp, str(b), "variance"]))
+                if b == 1:
+                    header.append("_".join([datestamp, "VV", "mean"]))
+                    header.append("_".join([datestamp, "VV", "range"]))
+                    header.append("_".join([datestamp, "VV", "variance"]))
+                if b == 2:
+                    header.append("_".join([datestamp, "VH", "mean"]))
+                    header.append("_".join([datestamp, "VH", "range"]))
+                    header.append("_".join([datestamp, "VH", "variance"]))
 
         with open(csv_for_ml_fname, "w") as outpf:
             my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
