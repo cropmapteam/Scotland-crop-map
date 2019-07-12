@@ -30,27 +30,6 @@ def get_aoi_from_shapefile(shp_fname, buffer_d=100):
 
     return aoi_min_x, aoi_min_y, aoi_max_x, aoi_max_y
 
-# TODO restrict images to just those that isect with shp extent
-# def fetch_image_metadata_from_csv(md_csv_fname):
-#     """
-#     from view dump image metadata to csv by in pgadmin4 running this query
-#
-#     SELECT path_to_image, image_day, image_month, image_year FROM geocrud.image_bounds_meta_isect_w_gt;
-#
-#     and then save to a csv
-#
-#     :param md_csv_fname:
-#     :return: a dict like this: {"<path_to_image>":["<image_day>", "<image_month>", "<image_year>"],}
-#     """
-#     image_metadata = {}
-#     if os.path.exists(md_csv_fname):
-#         with open(md_csv_fname, "r") as inpf:
-#             my_reader = csv.DictReader(inpf)
-#             for r in my_reader:
-#                 image_metadata[r["path_to_image"]] = [r["image_day"], r["image_month"], r["image_year"]]
-#
-#     return image_metadata
-
 
 def fetch_image_metadata_from_csv_filtered(md_csv_fname, zones_shp_fname, buffer_d=100):
 
@@ -83,8 +62,6 @@ def fetch_image_metadata_from_csv_filtered(md_csv_fname, zones_shp_fname, buffer
                             image_metadata[path_to_image] = [image_day, image_month, image_year]
                             filtered_record_count += 1
                         all_record_count += 1
-
-    #print("{}/{} images intersected with the shapefile".format(filtered_record_count, all_record_count))
 
     return image_metadata
 
@@ -128,7 +105,6 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
     the_window = None
     window_all_nodata = False
 
-    #with rasterio.open(fname, nodata='nan') as src:
     with rasterio.open(fname) as src:
 
         w = src.width
@@ -293,28 +269,6 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     return zs_fname
 
 
-# def validate_zonal_stats(fname="/home/james/Desktop/zonal_stats.csv"):
-#     if os.path.exists(fname):
-#         odd = {}
-#
-#         with open(fname, "r") as inpf:
-#             my_reader = csv.DictReader(inpf)
-#             for r in my_reader:
-#                 zs_count = r["zs_count"]
-#                 if zs_count == '0':
-#                     img_fname = r["img_fname"]
-#                     gt_poly_id = r["gt_poly_id"]
-#                     if img_fname in odd:
-#                         if gt_poly_id not in odd[img_fname]:
-#                             odd[img_fname].append(gt_poly_id)
-#                     else:
-#                         odd[img_fname] = [gt_poly_id]
-#
-#         if len(odd) > 0:
-#             print("Validation found some problems:")
-#             for o in odd:
-#                 print(o, len(odd[o]))
-
 # TODO the writing of the csv to the form needed to the R ml should be done in the main generate_zonal_stats func
 #  rather than as a repeated write, read and then re-write as this
 def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
@@ -420,8 +374,6 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
 
 def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path):
     # get image metadata which determines which images we collect zonal stats from
-    #image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
-
     image_metadata = fetch_image_metadata_from_csv_filtered(image_metadata_fname, zones_shp_fname, buffer_d=100)
 
     # generate zonal stats
@@ -432,10 +384,6 @@ def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, outpu
     print("[2] reformatting zonal stats to csv form needed for R")
     csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
-
-    # TODO do we still want to validate zonal stats?
-    #  print("[3] validating zonal stats")
-    #   validate_zonal_stats()
 
 
 def mp_fetch_zonal_stats_for_shapefile(job_params):
@@ -452,7 +400,6 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     output_path = job_params[2]
 
     # get image metadata which determines which images we collect zonal stats from
-    #image_metadata = fetch_image_metadata_from_csv(image_metadata_fname)
     image_metadata = fetch_image_metadata_from_csv_filtered(image_metadata_fname, zones_shp_fname, buffer_d=100)
 
     # generate zonal stats
@@ -463,10 +410,6 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     print("[2] reformatting zonal stats to csv form needed for R")
     csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
-
-    # TODO do we still want to validate zonal stats?
-    #  print("[3] validating zonal stats")
-    #   validate_zonal_stats()
 
 
 def main():
