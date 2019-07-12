@@ -21,7 +21,7 @@ def main():
     path_to_shps = "/home/james/geocrud/partitions/*.shp"
 
     # is a CSV describing which S1 images zonal stats are to found for
-    image_metadata_fname = "/home/james/Downloads/some_images_meta.csv"
+    image_metadata_fname = "data/image_bounds_meta.csv"
 
     # is where the output zonal stats csv`s should be placed
     output_path = "/home/james/geocrud/zonal_stats"
