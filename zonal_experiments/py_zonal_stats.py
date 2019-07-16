@@ -193,7 +193,8 @@ def my_variance(x):
     """
     return np.var(x)
 
-
+# TODO write the csv directly in the form that write_data_to_csv_for_ml() provides to avoid writing, reading and then
+#  rewriting the csv
 def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     """
 
@@ -269,8 +270,6 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     return zs_fname
 
 
-# TODO the writing of the csv to the form needed to the R ml should be done in the main generate_zonal_stats func
-#  rather than as a repeated write, read and then re-write as this
 def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
     """
     write the zonal stats to a form that is needed for R
