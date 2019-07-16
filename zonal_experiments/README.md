@@ -1,5 +1,23 @@
 ## Python Geoprocessing scripts to process Sentinel S1 data
 
+### Setup/Requirements
+
+Python3 assumed
+
+Create a Python3 Virtual Environment in your home directory
+
+In the activated Virtual Environment, pip install:
+
+- fiona
+- shapely
+- rasterio
+- rasterstats
+
+The run the required py script inside the Virtual Environment
+
+py_zonal_stats.py was tested to run inside a Python3 Virtual Environment with these libraries pip installed
+on the epcc VM on 160719.
+
 ### 1. Image Metadata
 
 When processing the S1 data we need metadata which tells us which images are available to be processed etc
