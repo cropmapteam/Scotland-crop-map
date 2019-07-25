@@ -42,8 +42,6 @@ def create_file_structure(base_path_to_images_to_be_moved, base_output_path):
                     test_or_train_type = "Train"
                 idx += 1
 
-                #images_to_move_path = "/home/james/geocrud/Clipped/ValidResized/*_SpkRL_{}_*.tif".format(str(i))
-
                 images_to_move_path = (os.path.join(base_path_to_images_to_be_moved, "*_SpkRL_{}_*.tif")).format(
                     str(i)
                 )
