@@ -6,10 +6,10 @@
    this script does is take the folder of greyscaled images and creates
    and moves the images into the Test/Train directory structure
 
-   Under each Test/Train folder is a sub-folder for every LCTYPE which
+   Under each Train/Test folder is a sub-folder for every LCTYPE which
    contains all the images of that LCTYPE
 
-   there is a 60/40 Test/Train split
+   there is a 60/40 Train/Test split
 
    if there are less than 4 instances of a particular LCTYPE, the LCTYPE is
    skipped (because 2 in Test/Train in such cases is not enough samples
@@ -57,11 +57,12 @@ def create_file_structure(base_path_to_images_to_be_moved, base_output_path):
             split_point = int(round((num_instances / 100.0) * 60))
             idx = 1
             test_or_train_type = None
+
             for i in instance_gids:
                 if idx <= split_point:
-                    test_or_train_type = "Test"
-                else:
                     test_or_train_type = "Train"
+                else:
+                    test_or_train_type = "Test"
                 idx += 1
 
                 images_to_move_path = (os.path.join(base_path_to_images_to_be_moved, "*_SpkRL_{}_*.tif")).format(
@@ -87,8 +88,8 @@ def create_file_structure(base_path_to_images_to_be_moved, base_output_path):
 
 def main():
     create_file_structure(
-        base_path_to_images_to_be_moved="/home/james/Desktop/KelsoGreyscale",
-        base_output_path="/home/james/Desktop/KelsoGreyscaleRestructured"
+        base_path_to_images_to_be_moved="/home/james/Desktop/KelsoGreyscale-Band2",
+        base_output_path="/home/james/Desktop/KelsoGreyscaleRestructuredb2"
     )
 
 
