@@ -23,6 +23,7 @@ import fiona
 import rasterio
 import rasterio.mask
 from shapely.geometry import shape
+import csv
 
 
 def mask_out_rfi_regions(src_raster_fname, efi_regions_shp_fname, out_raster_fname):
@@ -62,8 +63,7 @@ def mask_out_rfi_regions(src_raster_fname, efi_regions_shp_fname, out_raster_fna
 def get_mask_shp_raster_pairs():
 
     my_d = {}
-
-    base_path_to_rfi_shapefiles = "/home/james/serviceDelivery/CropMaps/RFI_masks/rfi"
+    base_path_to_rfi_shapefiles = "/home/james/serviceDelivery/CropMaps/RFI_masks/rfi/RFI_Masks_040719"
     base_path_to_images = "/home/james/serviceDelivery/CropMaps/data_from_jncc_050619"
 
     for root, folders, files in os.walk(base_path_to_rfi_shapefiles):
@@ -86,10 +86,44 @@ def get_mask_shp_raster_pairs():
     return my_d
 
 
+def get_mask_shp_raster_pairs_from_csv(csv_fn):
+    """
+    do masking based on a set of images/masks provided in a csv
+
+    csv has format like this:
+
+    "img","shp_mask"
+    <path_to_img_to_mask>, <path_to_shp_mask>
+
+    :param csv_fn:
+    :return:
+    """
+    my_d = {}
+    if os.path.exists(csv_fn):
+        with open(csv_fn) as inpf:
+            my_reader = csv.DictReader(inpf)
+            for r in my_reader:
+                img = r["img"]
+                shp_mask = r["shp_mask"]
+                k = os.path.split(img)[-1]
+                print(k, img, shp_mask)
+
+                if os.path.exists(img):
+                    if k in my_d:
+                        my_d[k].append([img, shp_mask])
+                    else:
+                        my_d[k] = [[img, shp_mask]]
+                else:
+                    print("Could not find image {}".format(img))
+
+    return my_d
+
+
 def main():
-    base_output_path = "/home/james/geocrud"
+    base_output_path = "/home/james/geocrud/out_images"
 
     d = get_mask_shp_raster_pairs()
+    #d = get_mask_shp_raster_pairs_from_csv("/home/james/Desktop/mask_shp_raster_pairs.csv")
     for i in d:
         if len(d[i]) == 1:
             path_to_img_to_be_masked = d[i][0][0]
@@ -104,4 +138,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
