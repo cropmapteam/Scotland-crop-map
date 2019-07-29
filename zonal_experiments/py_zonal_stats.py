@@ -270,6 +270,107 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     return zs_fname
 
 
+# def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
+#     """
+#     write the zonal stats to a form that is needed for R
+#
+#     :param zs_csv_fname:
+#     :param csv_for_ml_fname:
+#     :return:
+#     """
+#     all_dates = []
+#
+#     if os.path.exists(zs_csv_fname):
+#         out_data = {}
+#         with open(zs_csv_fname, "r") as inpf:
+#             my_reader = csv.DictReader(inpf)
+#             for r in my_reader:
+#                 zs_count = r["zs_count"]
+#                 if zs_count != 0:
+#
+#                     gt_poly_id = int(r["gt_poly_id"])
+#                     gt_fid_1 = r["gt_fid_1"]
+#                     lcgroup = r["lcgroup"]
+#                     lctype = r["lctype"]
+#                     area = r["area"]
+#                     img_date = r["img_date"]
+#                     if img_date not in all_dates:
+#                         all_dates.append(img_date)
+#                     band = r["band"]
+#                     zs_mean = r["zs_mean"]
+#                     zs_range = r["zs_range"]
+#                     zs_variance = r["zs_variance"]
+#
+#                     if gt_poly_id not in out_data:
+#                         out_data[gt_poly_id] = {
+#                             "gt_fid_1": gt_fid_1,
+#                             "lcgroup": lcgroup,
+#                             "lctype": lctype,
+#                             "area": area,
+#                             "band_data": {
+#                                 1: {},
+#                                 2: {}
+#                             }
+#                         }
+#
+#                     out_data[gt_poly_id]["band_data"][int(band)][img_date] = [zs_mean, zs_range, zs_variance]
+#
+#         indexed_all_dates = {}
+#         idx = 1
+#         for i in sorted(all_dates):
+#             indexed_all_dates[idx] = i
+#             idx += 1
+#
+#         header = ["id", "fid_1", "lcgroup", "lctype", "area"]
+#         # band1 is VV
+#         # band2 is VH
+#         for b in (1, 2):
+#             for i in sorted(indexed_all_dates.keys()):
+#                 datestamp = indexed_all_dates[i]
+#                 if b == 1:
+#                     header.append("_".join([datestamp, "VV", "mean"]))
+#                     header.append("_".join([datestamp, "VV", "range"]))
+#                     header.append("_".join([datestamp, "VV", "variance"]))
+#                 if b == 2:
+#                     header.append("_".join([datestamp, "VH", "mean"]))
+#                     header.append("_".join([datestamp, "VH", "range"]))
+#                     header.append("_".join([datestamp, "VH", "variance"]))
+#
+#         with open(csv_for_ml_fname, "w") as outpf:
+#             my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+#             my_writer.writerow(header)
+#
+#             for gt_poly_id in sorted(out_data.keys()):
+#                 ml_data = [gt_poly_id]
+#                 fid_1 = out_data[gt_poly_id]["gt_fid_1"]
+#                 ml_data.append(fid_1)
+#
+#                 lcgroup = out_data[gt_poly_id]["lcgroup"]
+#                 ml_data.append(lcgroup)
+#
+#                 lctype = out_data[gt_poly_id]["lctype"]
+#                 ml_data.append(lctype)
+#
+#                 area = out_data[gt_poly_id]["area"]
+#                 ml_data.append(area)
+#
+#                 for b in (1, 2):
+#                     band_data = out_data[gt_poly_id]["band_data"][b]
+#                     for i in sorted(indexed_all_dates.keys()):
+#                         datestamp = indexed_all_dates[i]
+#                         zs_mean = None
+#                         zs_range = None
+#                         zs_variance = None
+#                         if datestamp in band_data:
+#                             zs_mean = band_data[datestamp][0]
+#                             zs_range = band_data[datestamp][1]
+#                             zs_variance = band_data[datestamp][2]
+#                         ml_data.append(zs_mean)
+#                         ml_data.append(zs_range)
+#                         ml_data.append(zs_variance)
+#                 my_writer.writerow(ml_data)
+
+
 def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
     """
     write the zonal stats to a form that is needed for R
@@ -293,27 +394,34 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
                     lcgroup = r["lcgroup"]
                     lctype = r["lctype"]
                     area = r["area"]
-                    img_date = r["img_date"]
-                    if img_date not in all_dates:
-                        all_dates.append(img_date)
                     band = r["band"]
                     zs_mean = r["zs_mean"]
                     zs_range = r["zs_range"]
                     zs_variance = r["zs_variance"]
+                    img_date = r["img_date"]
+                    if img_date not in all_dates:
+                        all_dates.append(img_date)
 
-                    if gt_poly_id not in out_data:
-                        out_data[gt_poly_id] = {
-                            "gt_fid_1": gt_fid_1,
-                            "lcgroup": lcgroup,
-                            "lctype": lctype,
-                            "area": area,
-                            "band_data": {
-                                1: {},
-                                2: {}
+                    skip = False
+                    # we need to skip cases where the data is like this
+
+                    if zs_mean == "" and zs_range == "" and zs_variance == "--":
+                        skip = True
+
+                    if not skip:
+                        if gt_poly_id not in out_data:
+                            out_data[gt_poly_id] = {
+                                "gt_fid_1": gt_fid_1,
+                                "lcgroup": lcgroup,
+                                "lctype": lctype,
+                                "area": area,
+                                "band_data": {
+                                    1: {},
+                                    2: {}
+                                }
                             }
-                        }
 
-                    out_data[gt_poly_id]["band_data"][int(band)][img_date] = [zs_mean, zs_range, zs_variance]
+                        out_data[gt_poly_id]["band_data"][int(band)][img_date] = [zs_mean, zs_range, zs_variance]
 
         indexed_all_dates = {}
         idx = 1
@@ -406,9 +514,9 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
 
     # reformat the zonal stats csv into the form needed for R
-    print("[2] reformatting zonal stats to csv form needed for R")
-    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
-    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
+    #print("[2] reformatting zonal stats to csv form needed for R")
+    #csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
+    #write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
 
 def main():
