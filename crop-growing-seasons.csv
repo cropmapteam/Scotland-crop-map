@@ -1,0 +1,59 @@
+﻿CropName,LCTYPE ,January,February,March,April,May,June,July,August,September,October,November,December,LandSize,Notes,,,
+Rough grazings,RGR,,,,,,,,,,,,,Millions of hectares,,,,Millions of hectares
+Grass >5yrs old,PGRS5,,,,,,,,,,,,,Millions of hectares,,,,Hundreds of thousands of hectares
+Woodland,WDG,,,,,,,,,,,,,Hundreds of thousands of hectares,,,,Tens of thousands of hectares
+Spring barley,SB,,,,,,,,,,,,,Hundreds of thousands of hectares,,,,"< 10,000 hectares"
+Grass <5yrs old,PGRS4,,,,,,,,,,,,,Hundreds of thousands of hectares,,,V,Vegetative
+Other land,X,,,,,,,,,,,,,Hundreds of thousands of hectares,,,F,Flowering
+Wheat,WHEAT,0.00,0.00,0.25,0.50,0.75,1.00,1.00,1.00,0.00,0.00,0.00,0.00,Tens of thousands of hectares,,,M,Maturing
+Winter barley,WB,,,,,,,,,,,,,Tens of thousands of hectares,,,H,Harvest
+Fallow land - less than five years,FALW,,,,,,,,,,,,,Tens of thousands of hectares,,,P,Planting
+Winter oilseed rape,WOSR,0.50,0.75,1.00,1.00,1.00,1.00,1.00,0.75,0.00,0.00,0.00,0.00,Tens of thousands of hectares,"V, V, V, F(yellow), F(yellow), F(yellow), M(brown), H(), P,P",,GS,Ground-Stored under straw
+Spring oats,SO,0.00,0.25,0.50,1.00,1.00,1.00,1.00,1.00,0.50,0.00,0.00,0.00,Tens of thousands of hectares,,,D,Desicate
+Ware potatoes,WPOT,0.00,0.00,0.00,0.25,0.75,1.00,1.00,1.00,0.75,0.75,0.50,0.00,Tens of thousands of hectares,D=Sept,,R,Rotation of crops
+Seed potatoes,SPOT,0.00,0.00,0.25,0.50,1.00,1.00,1.00,0.50,0.00,0.00,0.00,0.00,Tens of thousands of hectares,"F(purple)=June,  F(white) = July ",,IC,"Intercropping: 2 crops in the same plot, usually large (corn) and small (mustard) growing at the same time. "
+"Other crops (includes nursery stock, protected crops and unspecified crops)",X,,,,,,,,,,,,,Tens of thousands of hectares,,,,
+Unspecified crops,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Winter oats,WO,1.00,1.00,1.00,1.00,1.00,0.75,0.50,0.25,0.00,0.25,0.50,0.75,"< 10,000 hectares",,,,
+Peas for canning,SPEAS,0.00,0.00,0.00,0.25,0.50,0.75,1.00,0.50,0.00,0.00,0.00,0.00,"< 10,000 hectares","Green=May-June, White=July,  F=June/July",,,
+Other crops for stockfeed,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Rye,RYE,0.00,0.00,0.25,0.50,0.75,1.00,1.00,1.00,0.00,0.00,0.00,0.00,"< 10,000 hectares",,,,
+Fallow land - five years and more,FALW,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Turnips & swedes for stockfeed,TSF,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Carrots,CARROTS,0.00,0.00,0.00,0.25,0.50,0.75,1.00,1.00,1.00,0.00,0.00,0.00,"< 10,000 hectares",GS=Oct to Mar ,,,
+Beans for combining,BEANS_COMB,0.00,0.00,0.00,0.25,0.50,0.75,1.00,0.50,0.00,0.00,0.00,0.00,"< 10,000 hectares",Same as peas,,,
+Kale & cabbage for stockfeed,OCS_K,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Rape for stockfeed,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Beans for canning,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Plastic structures,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Calabrese,CALA,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Turnips & swedes,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Glasshouses: area of which is strawberries,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Triticale,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Brussels sprouts,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Other vegetables,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Maize,MAIZ,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Fodder beet,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Bulbs/flowers grown in the open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Peas for combining,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Spring oilseed rape,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Cauliflower,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Cabbages and savoys,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Blackcurrants  - grown in the open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Ornamental trees,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Mixed fruit - grown in the open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Raspberries - grown in the open,RASP_OPEN,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Lettuce,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Rhubarb,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Leeks,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Glass structures,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Blueberries - Grown in the open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Strawberries - grown in the open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Shrubs,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Other nursery stock,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Mixed grain,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Fruit stocks,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Lupins,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Bedding plants in open,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Roses,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
+Linseed,X,,,,,,,,,,,,,"< 10,000 hectares",,,,
