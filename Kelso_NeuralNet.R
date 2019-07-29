@@ -50,13 +50,15 @@ plot_theme <- theme(
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-pdf(file="Kelso_Neural_Network.pdf")
+#pdf(file="Kelso_Neural_Network_Band-1.pdf")
+pdf(file="Kelso_Neural_Network_Band-2.pdf")
 
 # create Code inputs & results file 
-txtStart(file="Kelso_Neural_Network.txt", commands=TRUE, results=TRUE, append=FALSE) 
+#txtStart(file="Kelso_Neural_Network_Band-1.txt", commands=TRUE, results=TRUE, append=FALSE) 
+txtStart(file="Kelso_Neural_Network_Band-2.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
-# FOLDERS MAPPING for band1 or band2 images #### 
+# ==> USER INPUT: FOLDERS MAPPING for Band-1 or Band-2 images #### 
 
 base_dir <- getwd() 
 base_dir
@@ -64,13 +66,13 @@ base_dir
 logs_dir <- file.path(base_dir, "Logs")
 logs_dir
 
-train_dir <- file.path(base_dir, "TrainB1")
-#train_dir <- file.path(base_dir, "TrainB2")
+#train_dir <- file.path(base_dir, "TrainB1")
+train_dir <- file.path(base_dir, "TrainB2")
 train_dir 
 
 
-test_dir <- file.path(base_dir, "TestB1")
-#test_dir <- file.path(base_dir, "TestB2")
+#test_dir <- file.path(base_dir, "TestB1")
+test_dir <- file.path(base_dir, "TestB2")
 test_dir 
 
 
@@ -236,9 +238,9 @@ test_samples
 # epochs - Number of times a model is run 
 # k_folds - 
 
-batch_size <- 300 
-epochs <- 10
-k_folds = 4 
+batch_size <- 200 
+epochs <- 30
+
 
 # MODEL 1 - layers 64-12, Relu #### 
 # Network Structure: layers 64-12, Relu 
