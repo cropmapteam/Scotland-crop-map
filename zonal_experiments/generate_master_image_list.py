@@ -1,3 +1,23 @@
+"""
+
+    script to build a list of images that should be used for processing.
+    this list will be a mix of untouched jncc images and jncc images that
+    we have created derived images from with RFI artefacts masked out
+
+    processed_scences_dates is the list of dates we process images for. It is based
+    on the contents of data/Sentinel1_TotalProcessedScenes_20190712.csv(.xlsx) which
+    lists the folders of S1 data on the JNCC webspace
+
+    rfi_masked_images is the subset of JNCC images which TeamScotCropMap have done
+    processing on to create derived versions of the images which have had RFI artefacts
+    removed
+
+    output is a bunch of screen output and a csv with the following content:
+
+    "path_to_image","img_min_x","img_min_y","img_max_x","img_max_y"
+"""
+
+
 import glob
 import os
 import csv
@@ -199,7 +219,7 @@ print("Total Number of images: {}, of which {} are untouched, {} have been RFI-m
 
 with open(out_csv_fname, "w") as outpf:
     my_writer = csv.writer(outpf, delimiter=",", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-    my_writer.writerow(["path_to_img", "img_min_x", "img_min_y", "img_max_x", "img_max_y"])
+    my_writer.writerow(["path_to_image", "img_min_x", "img_min_y", "img_max_x", "img_max_y"])
 
     for img in df_master_images:
         if not os.path.exists(img):
