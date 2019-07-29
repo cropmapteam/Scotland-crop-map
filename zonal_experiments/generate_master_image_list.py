@@ -1,6 +1,7 @@
 import glob
 import os
-
+import csv
+import rasterio
 
 processed_scenes_dates = ['20180101', '20180107', '20180113', '20180119', '20180125', '20180131', '20180206',
                           '20180212', '20180218', '20180224', '20180302', '20180308', '20180314', '20180320',
@@ -115,6 +116,9 @@ base_path_to_rfi_images = "/data/Sentinel1/RFI_masked_images"
 # change on epcc vm
 base_path_to_jncc_images = "/data/Sentinel1/jncc_supplied_images/images_from_jncc_250719"
 
+# change on epcc vm
+out_csv_fname = "/home/geojamesc/image_bounds_meta_290719.csv"
+
 jncc_images = []
 
 for jncc_fn in glob.glob(os.path.join(base_path_to_jncc_images, "*.tif")):
@@ -192,6 +196,31 @@ print("Total Number of images: {}, of which {} are untouched, {} have been RFI-m
     non_rfi_masked_count,
     rfi_masked_count
 ))
+
+with open(out_csv_fname, "w") as outpf:
+    my_writer = csv.writer(outpf, delimiter=",", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+    my_writer.writerow(["path_to_img", "img_min_x", "img_min_y", "img_max_x", "img_max_y"])
+
+    for img in df_master_images:
+        if not os.path.exists(img):
+            unfound_image_count += 1
+            unfound_images.append(img)
+        else:
+            with rasterio.open(img) as src:
+                my_writer.writerow([
+                    img,
+                    src.bounds.left,
+                    src.bounds.bottom,
+                    src.bounds.right,
+                    src.bounds.top
+                ])
+
+        if "RFI_masked_images" in img:
+            rfi_masked_count += 1
+        else:
+            non_rfi_masked_count += 1
+        print(img)
+
 
 if unfound_image_count > 0:
     print("Warning! {} of images not found".format(unfound_image_count))
