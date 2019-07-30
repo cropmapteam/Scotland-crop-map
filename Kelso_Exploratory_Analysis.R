@@ -36,10 +36,10 @@ library(TeachingDemos)   # for capturing commands and Console output in txt file
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-pdf(file="Kelso_Exploratory_Analysis.pdf")
+#pdf(file="Kelso_Exploratory_Analysis.pdf")
 
 # create console output file (TXT) 
-txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
+#txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # BRANDING TEMPLATES: Colors, Emojis, Titles #### 
@@ -84,7 +84,7 @@ plot_theme <- theme(
 
 
 # DATASET IMPORT #### 
-allData<- read.csv("kelso-monthlyzonal-2018-fixed.csv") 
+allData<- read.csv("ground_truth_v5_2018_inspection_kelso_250619_zonal_stats_for_ml.csv") 
 
 
 # DATASET CHECK #### 
@@ -114,14 +114,14 @@ table(allData$LCTYPE)
 # table by LCGROUP by LCTYPE 
 table(allData$LCGROUP, allData$LCTYPE) 
 
-# plot by AREA 
+# plot by AREA (variale in sq-km)
 # source: https://www.r-bloggers.com/how-to-make-a-histogram-with-ggplot2/ 
 ggplot(allData, aes(x=AREA)) + 
-        geom_histogram(breaks=seq(0, 30, by = 4), 
+        geom_histogram(breaks=seq(0, 300000, by = 20000), 
                        fill="saddlebrown", 
                        aes(fill=..count..)) + 
         labs(title="Fields by Area Size (AREA)", 
-             x = "Area (in hectares)", 
+             x = "Area (in square kilometers)", 
              y = "Number of farm fields") + 
         plot_subtitle + 
         plot_caption + 
@@ -130,10 +130,10 @@ ggplot(allData, aes(x=AREA)) +
 # Density plot by AREA 
 # source: http://www.sthda.com/english/wiki/ggplot2-density-plot-quick-start-guide-r-software-and-data-visualization 
 ggplot(allData, aes(x=AREA)) + 
-        geom_histogram(aes(y=..density..), fill="saddlebrown", bins=30)+
+        geom_histogram(aes(y=..density..), fill="saddlebrown", bins=20) +
         geom_density(alpha=.2, fill="#FF6666") + 
         labs(title="Fields by Area Size (AREA)", 
-             x = "Area (in hectares)", 
+             x = "Area (in square kilometers)", 
              y = "Number of farm fields") + 
         plot_subtitle + 
         plot_caption + 
@@ -163,26 +163,26 @@ ggplot(allData, aes(x=LCTYPE)) +
 
 # AREA subsets: Small, Med, Large #### 
 
-# by small AREA ( <= 10 hectares)
-table(allData$AREA <= 10)
-table(allData$LCGROUP, allData$AREA <= 10) 
-table(allData$LCTYPE, allData$AREA <= 10) 
+# by small AREA ( <= 10000 sq-km)
+table(allData$AREA <= 10000)
+table(allData$LCGROUP, allData$AREA <= 10000) 
+table(allData$LCTYPE, allData$AREA <= 10000) 
 
 # small AREA by LCGROUP 
-ggplot(data=subset(allData, AREA <= 10), aes(x=LCGROUP)) + 
+ggplot(data=subset(allData, AREA <= 10000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on SMALL fields (AREA less than 10 hectares)", 
+        labs(title="Land Cover Group (LCGROUP) on SMALL fields \n(AREA less than 10,000 sq-km)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
         plot_theme
 
 # small AREA by LCTYPE
-ggplot(data=subset(allData, AREA <= 10), aes(x=LCTYPE)) + 
+ggplot(data=subset(allData, AREA <= 10000), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on SMALL fields (AREA less than 10 hectares)", 
+        labs(title="Land Cover Type (LCTYPE) on SMALL fields \n(AREA less than 10,000 sq-km)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -190,26 +190,26 @@ ggplot(data=subset(allData, AREA <= 10), aes(x=LCTYPE)) +
         plot_theme 
 
 
-# by medium AREA ( > 10 and <= 20 hectares)
-table((allData$AREA > 10) & (allData$AREA < 20)) 
-table(allData$LCGROUP, ((allData$AREA > 10) & (allData$AREA < 20)))
-table(allData$LCTYPE, ((allData$AREA > 10) & (allData$AREA < 20)))
+# by medium AREA ( > 10,000 and <= 20,000 sq-km)
+table((allData$AREA > 10000) & (allData$AREA < 20000)) 
+table(allData$LCGROUP, ((allData$AREA > 10000) & (allData$AREA < 20000)))
+table(allData$LCTYPE, ((allData$AREA > 10000) & (allData$AREA < 20000)))
 
 # medium AREA by LCGROUP 
-ggplot(data=subset(allData, AREA > 10 & AREA <= 20), aes(x=LCGROUP)) + 
+ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on MEDIUM size fields (AREA between 10 & 20 hectares)", 
+        labs(title="Land Cover Group (LCGROUP) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-km)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
         plot_theme
 
 # medium AREA by LCTYPE
-ggplot(data=subset(allData, AREA > 10 & AREA <= 20), aes(x=LCTYPE)) + 
+ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on MEDIUM size fields (AREA between 10 & 20 hectares)", 
+        labs(title="Land Cover Type (LCTYPE) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-km)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -217,16 +217,16 @@ ggplot(data=subset(allData, AREA > 10 & AREA <= 20), aes(x=LCTYPE)) +
         plot_theme 
 
 
-# by large AREA ( > 20 hectares)
-table(allData$AREA > 20)
-table(allData$LCGROUP, allData$AREA > 20) 
-table(allData$LCTYPE, allData$AREA > 20) 
+# by large AREA ( > 20,000 sq-km)
+table(allData$AREA > 20000)
+table(allData$LCGROUP, allData$AREA > 20000) 
+table(allData$LCTYPE, allData$AREA > 20000) 
 
 # large AREA by LCGROUP 
-ggplot(data=subset(allData, AREA > 20), aes(x=LCGROUP)) + 
+ggplot(data=subset(allData, AREA > 20000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on LARGE fields (AREA greather than 20 hectares)", 
+        labs(title="Land Cover Group (LCGROUP) on LARGE fields \n(AREA greather than 20,000 sq-km)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
@@ -236,7 +236,7 @@ ggplot(data=subset(allData, AREA > 20), aes(x=LCGROUP)) +
 ggplot(data=subset(allData, AREA > 20), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on LARGE fields (AREA greather than 20 hectares)", 
+        labs(title="Land Cover Type (LCTYPE) on LARGE fields \n(AREA greather than 20 hectares)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -319,15 +319,17 @@ ggplot(data=subset(allData, LCGROUP == "Permanent Grassland"), aes(x=LCTYPE)) +
 
 
 # VV and VH CROPS PLOTS #### 
-# Remove non-crop fields #### 
-#   ie rows where LCTYPE = FALW, NETR_NA, WDG  
+# Remove fields with non-crops  
 # FAWL = FALLOW no production 15 January to 15 July (11 rows) 
 # NETR_NA = NEW WOODLAND AND FORESTRY (1 row) 
+# RGR = Rough Grazing (4 rows) 
 # WDG = OPEN WOODLAND (GRAZED) (8 rows) 
 
 allData <- allData[(allData$LCTYPE != "FALW"), ]
 allData <- allData[(allData$LCTYPE != "NETR_NA"), ]
+allData <- allData[(allData$LCTYPE != "RGR"), ]
 allData <- allData[(allData$LCTYPE != "WDG"), ]
+
 table(allData$LCTYPE) 
 table(droplevels(allData$LCTYPE)) 
 
@@ -341,71 +343,50 @@ str(allData)
 rangeVars <- c(grep(pattern="range", names(allData))) 
 
 # create new dataset (newData) excluding useless variables 
-newData <- subset(allData, select = -c(GROSS_AREA, X_count, X_sum, X_mean, 
-                                       LCgroup, rangeVars)) 
+newData <- subset(allData, select = -c(LCgroup, rangeVars)) 
 str(newData)
-## we're left with data.frame:	393 obs. of  41 variables 
+## we're left with data.frame:	389 obs. of  201 variables 
 
 
 # Create MEANS VV and VH datasets #### 
-# ref: https://stackoverflow.com/questions/24561936/grep-to-search-column-names-of-a-dataframe 
-# newData = {meanData} + {varData} 
-# meanData = {meanVVdata} + {meanVHdata} 
-# varData = {varVVdata} + {varVHdata} 
+
+# create VV and VH means and variance variables 
+varsVVmeans <- c(grep(pattern="VV_mean", names(newData))) 
+varsVHmeans <- c(grep(pattern="VH_mean", names(newData))) 
+
+varsVVvar <- c(grep(pattern="VV_variance", names(newData))) 
+varsVHvar <- c(grep(pattern="VH_variance", names(newData)))  
 
 
-# create variance variables list 
-varVars <- c(grep(pattern="varian", names(newData))) # all Variance variables 
-varVHvars <- c(grep(pattern="[.]2varian", names(newData)))  # only VH Variance variables 
-
-# create Means-only dataset (allData MINUS Variance variables) 
-meanData <- subset(newData, select = -c(varVars)) 
-str(meanData) 
-## data.frame:	393 obs. of  23 variables 
-
-# create mean VH variables 
-meanVHvars <- c(grep(pattern="[.]2mean", names(meanData)))  # only VH Mean variables 
-
-# create mean VV dataset 
-meanVVdata <- subset(meanData, select = -c(meanVHvars)) 
+# create VV MEAN dataset 
+meanVVdata <- subset(newData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, varsVVmeans)) 
 str(meanVVdata)
-# data.frame:	393 obs. of  14 variables
+# data.frame:	389 obs. of  54 variables 
 
-# create mean VH dataset 
-meanVHdata <- subset(meanData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, meanVHvars)) 
+# create VH MEAN dataset 
+meanVHdata <- subset(newData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, varsVHmeans)) 
 str(meanVHdata)
-# data.frame:	393 obs. of  14 variables 
+# data.frame:	389 obs. of  54 variables 
 
 
-# Create VARIANCE VV and VH datasets #### 
-# create mean variables list 
-meanVars <- c(grep(pattern="mean", names(newData))) # all Mean variables 
-meanVHvars <- c(grep(pattern="[.]2mean", names(newData)))  # only VH Mean variables 
-
-# create Variables-only dataset (allData MINUS Means variables) 
-varData <- subset(newData, select = -c(meanVars)) 
-str(varData) 
-## data.frame:	393 obs. of  23 variables 
-
-# create variance VH variables 
-varVHvars <- c(grep(pattern="[.]2varian", names(varData)))  # only VH Variance variables 
-
-# create variance VV dataset 
-varVVdata <- subset(varData, select = -c(varVHvars)) 
+# create VV VARIANCE dataset 
+varVVdata <- subset(newData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, varsVVvar)) 
 str(varVVdata)
-# data.frame:	393 obs. of  14 variables
+# data.frame:	389 obs. of  54 variables
 
-# create variance VH dataset 
-varVHdata <- subset(varData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, varVHvars)) 
+# create VH MEAN dataset 
+varVHdata <- subset(newData, select = c(Id, FID_1, LCGROUP, LCTYPE, AREA, varsVHvar)) 
 str(varVHdata)
-# data.frame:	393 obs. of  14 variables 
+# data.frame:	389 obs. of  54 variables
 
 
 # Create Time-Series and Plot VV mean #### 
 # draft code by Zarah Pattison, Env. Researcher on ScotCropMap team 
 
-# Stack each set of columns for mean VV
-meanVVtime <- cbind(meanVVdata[1:5], stack(meanVVdata[6:14]))
+# Stack each set of columns for mean VV 
+# solution to warning message 
+# https://stackoverflow.com/questions/23534066/cbind-warnings-row-names-were-found-from-a-short-variable-and-have-been-discar 
+meanVVtime <- cbind(meanVVdata[1:5], stack(meanVVdata[6:54]), row.names = NULL)
 str(meanVVtime)
 
 # Replace the name given to column when stacked
@@ -418,26 +399,29 @@ str(meanVVtime)
 
 # Export stacked dataset and check that it's correct 
 #write.csv(meanVVtime, "meanVVtime.csv")
+#    theme(legend.position="bottom", legend.direction = "horizontal") + 
+
+# print x labels at 90 degree 
+# solution https://stackoverflow.com/questions/36682451/rotating-x-label-text-in-ggplot 
 
 vv_mean_plot <- ggplot(data=meanVVtime, aes(x=ind, y=values, colour=LCTYPE )) +
     geom_line() + 
-    theme(legend.position="bottom", legend.direction = "horizontal") + 
-#    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018", 
-                     limits = c("Jan", "Feb", "Mar","Apr","May",
-                                "June","July","Aug","Sept")) + 
+    theme(legend.position="none") + 
     labs(title="VV Mean by Month by Land Cover Type", 
          y = "VV mean") + 
+    scale_x_discrete(name = "2018", labels="ind") + 
+    theme(axis.text.x=element_text(angle=90,hjust=1)) + 
     plot_subtitle + 
     plot_caption + 
     plot_theme 
 
-vv_mean_plot
+vv_mean_plot 
+
 
 # Create Time-Series and Plot VH mean #### 
 
 # Stack each set of columns for mean VH 
-meanVHtime <- cbind(meanVHdata[1:5], stack(meanVHdata[6:14]))
+meanVHtime <- cbind(meanVHdata[1:5], stack(meanVHdata[6:54]), row.names = NULL)
 str(meanVHtime)
 
 # Replace the name given to column when stacked
@@ -455,9 +439,8 @@ vh_mean_plot <- ggplot(data=meanVHtime, aes(x=ind, y=values, colour=LCTYPE )) +
     geom_line() + 
     theme(legend.position="bottom", legend.direction = "horizontal") + 
 #    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018", 
-                     limits = c("Jan", "Feb", "Mar","Apr","May",
-                                "June","July","Aug","Sept")) + 
+    scale_x_discrete(name = "2018") + 
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
     labs(title="VH Mean by Month by Land Cover Type", 
          y = "VH mean") + 
     plot_subtitle + 
@@ -472,7 +455,7 @@ grid.arrange(vv_mean_plot, vh_mean_plot)
 # Create Time-Series and Plot VV variance #### 
 
 # Stack each set of columns for variance VV
-varVVtime <- cbind(varVVdata[1:5], stack(varVVdata[6:14]))
+varVVtime <- cbind(varVVdata[1:5], stack(varVVdata[6:54]), row.names = NULL)
 str(varVVtime)
 
 # Replace the name given to column when stacked
@@ -488,11 +471,10 @@ str(varVVtime)
 
 vv_var_plot <- ggplot(data=varVVtime, aes(x=ind, y=values, colour=LCTYPE )) +
     geom_line() + 
-    theme(legend.position="bottom", legend.direction = "horizontal") + 
-#    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018", 
-                     limits = c("Jan", "Feb", "Mar","Apr","May",
-                                "June","July","Aug","Sept")) + 
+#    theme(legend.position="bottom", legend.direction = "horizontal") + 
+    theme(legend.position="none") + 
+    scale_x_discrete(name = "2018") + 
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
     labs(title="VV Variance by Month by Land Cover Type", 
          y = "VV variance") + 
     plot_subtitle + 
@@ -505,7 +487,7 @@ vv_var_plot
 # draft code by Zarah Pattison, Env. Researcher on ScotCropMap team 
 
 # Stack each set of columns for variance VH 
-varVHtime <- cbind(varVHdata[1:5], stack(varVHdata[6:14]))
+varVHtime <- cbind(varVHdata[1:5], stack(varVHdata[6:54]), row.names = NULL)
 str(varVHtime)
 
 # Replace the name given to column when stacked
@@ -521,11 +503,10 @@ str(varVHtime)
 
 vh_var_plot <- ggplot(data=varVHtime, aes(x=ind, y=values, colour=LCTYPE )) +
     geom_line() + 
-    theme(legend.position="bottom", legend.direction = "horizontal") + 
-#    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018", 
-                     limits = c("Jan", "Feb", "Mar","Apr","May",
-                                "June","July","Aug","Sept")) + 
+#    theme(legend.position="bottom", legend.direction = "horizontal") + 
+    theme(legend.position="none") + 
+    scale_x_discrete(name = "2018") + 
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
     labs(title="VH Variance by Month by Land Cover Type", 
          y = "VH variance") + 
     plot_subtitle + 
