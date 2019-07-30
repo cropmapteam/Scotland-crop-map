@@ -429,7 +429,7 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
             indexed_all_dates[idx] = i
             idx += 1
 
-        header = ["id", "fid_1", "lcgroup", "lctype", "area"]
+        header = ["Id", "FID_1", "LCGROUP", "LCTYPE", "AREA"]
         # band1 is VV
         # band2 is VH
         for b in (1, 2):
