@@ -514,9 +514,9 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
 
     # reformat the zonal stats csv into the form needed for R
-    #print("[2] reformatting zonal stats to csv form needed for R")
-    #csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
-    #write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
+    print("[2] reformatting zonal stats to csv form needed for R")
+    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
+    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
 
 def main():
