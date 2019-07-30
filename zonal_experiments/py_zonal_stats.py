@@ -520,9 +520,9 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
 
 
 def main():
-    zones_shp_fname = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/ground_truth_v5_2018_inspection_kelso_250619.shp"
+    zones_shp_fname = "/data/Ground_Truth_Polys/kelso/ground_truth_v5_2018_inspection_kelso_250619.shp"
     image_metadata_fname = "data/image_bounds_meta.csv"
-    output_path = "/home/james/geocrud/zonal_stats"
+    output_path = "/home/geojamesc/geocrud/zonal_stats"
 
     fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
 
