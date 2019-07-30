@@ -13,23 +13,29 @@ Download all files (datasets and code) into the same folder before running the c
  
   DATASETS 
 ============ 
-THERE ARE 3 DATASETS INCLUDED IN SCOTTISH CROPS ANALYSIS: 
+THERE ARE 4 DATASETS INCLUDED IN SCOTTISH CROPS ANALYSIS: 
 
 1 - crop-growing-seasons.csv 
 Format: CSV 
-Size: 5 kb (tiny) 
+Size: 5 KB (tiny) 
 Contents: information about crops growing life-cycle. 
 Use: shows a generic crops growth pattern through the year (Jan to Dec). It will give you an idea of the data pattern you should expect to see in satellite images. 
 
-2 - kelso-monthlyzonal-2018-fixed.csv
+2 - ground_truth_v5_2018_inspection_kelso_250619_zonal_stats_for_ml.csv
 Format: CSV 
-Size: 303 kb (very small) 
-Contents: includes VV and VH means and variances for Jan to Oct 2018. 
+Size: 303 KB (very small) 
+Contents: Kelso LABELLED (ie. fields with crop types) data including VV and VH means and variances for Jan to Oct 2018. 
 Use: use to build Random Forest model. 
 
-3 - images in Train and Test folders (see James Crone at EDINA for folders location) 
+3 - kelso_to_be_classified.csv 
+Format: CSV 
+Size: 46.9 MB (big) 
+Contents: Kelso UN-LABELLED (ie. fields without crop types) data including VV and VH means and variances for Jan to Oct 2018.  
+Use: run it through the Random Forest model to assign crop type to each field. 
+
+4 - images in Train and Test folders (see James Crone at EDINA for folders location) 
 Format: TIF 
-Size: 150 meg x 4 folders (huge!) 
+Size: 150 MB x 4 folders (huge!) 
 Contents: images of individual fields, split between Train and Test sets, and by crop-type withing each set. 
 Use: use to build Neural Network model. 
 
