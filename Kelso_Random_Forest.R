@@ -40,13 +40,10 @@ library(TeachingDemos)  # for capturing commands and Console output in txt file
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-#pdf(file="Kelso_Random_Forest_nTree300_50-50split-mTry7.pdf")
-#pdf(file="Kelso_Random_Forest_nTree300_60-40split-mTry7.pdf")
-#pdf(file="Kelso_Random_Forest_nTree300_70-30split-mTry7.pdf")
+#pdf(file="Kelso_Random_Forest.pdf")
 
-#txtStart(file="Kelso_Random_Forest_nTree300_50-50split-mTry7.txt", commands=TRUE, results=TRUE, append=FALSE) 
-#txtStart(file="Kelso_Random_Forest_nTree300_60-40split-mTry7.txt", commands=TRUE, results=TRUE, append=FALSE) 
-#txtStart(file="Kelso_Random_Forest_nTree300_70-30split-mTry7.txt", commands=TRUE, results=TRUE, append=FALSE) 
+# create Commands output file (TXT) 
+#txtStart(file="Kelso_Random_Forest.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # ==> USER INPUT: SETUP model parameters: Train/Test split, RF params #### 
@@ -107,15 +104,45 @@ plot_theme <- theme(
   plot.caption = element_text(color = "darkgreen", face = "italic"))
 
 
-# DATASET IMPORT #### 
-allData<- read.csv("ground_truth_v5_2018_inspection_kelso_250619_zonal_stats_for_ml.csv") 
-
-# DATASET CHECK #### 
+# LABELLED DATASET - IMPORT AND CHECK #### 
+# import Kelso LABELLED dataset (413 obs) 
+allData <- read.csv("ground_truth_v5_2018_inspection_kelso_250619_zonal_stats_for_ml.csv") 
 str(allData)
-# summary(allData)
 
 
-# DATA CLEANUP: remove variables, remove crop types  #### 
+# UN-LABELLED DATASET - IMPORT AND CHECK #### 
+noLabels <- read.csv("kelso_to_be_classified.csv") 
+str(noLabels)
+
+# delete LCGROUP, LCTYPE variables (not needed)
+noLabels <- subset(noLabels, select = -c(LCGROUP, LCTYPE)) 
+str(noLabels) 
+# data.frame:	7616 obs. of  297 variables 
+
+
+# REMOVE rows with any ZERO's in them 
+# source: https://stackoverflow.com/questions/25203813/remove-rows-from-dataframe-that-contains-only-0-or-just-a-single-0 
+
+noLabels <- noLabels[ !rowSums(noLabels[,colnames(noLabels)[(3:ncol(noLabels))]]==0)>=1, ] 
+str(noLabels) 
+# data.frame:	7595 obs. of  297 variables 
+
+
+# REMOVE rows with NA's in them 
+# source: https://stackoverflow.com/questions/4862178/remove-rows-with-all-or-some-nas-missing-values-in-data-frame 
+
+# check for NA's  
+colSums(is.na(noLabels)) 
+
+# count number of NA's (not rows with NA's, just NA's) 
+length(na.omit(noLabels))
+
+# remove NA's 
+noLabels <- noLabels[complete.cases(noLabels), ]  
+str(noLabels) 
+
+
+# LABELLED DATA CLEANUP: remove variables, remove crop types  #### 
 set.seed(1234)
 
 # Remove useless variables: 
@@ -124,7 +151,7 @@ deleteRangeVars <- c(grep(pattern="range", names(allData)))
 deleteRangeVars 
 
 # create new dataset (keyData) without Range and other useless variables 
-keyData <- subset(allData, select = -c(Id, FID_1, deleteRangeVars)) 
+keyData <- subset(allData, select = -c(Id, FID_1, LCGROUP, deleteRangeVars)) 
 str(keyData)
 table(keyData$LCTYPE) 
 
@@ -217,7 +244,7 @@ testLCTYPE <- ggplot(test, aes(x=LCTYPE)) +
 grid.arrange(trainLCTYPE, testLCTYPE)
 
 
-# RANDOM FOREST model - using all variables (198 vars) #### 
+# RANDOM FOREST model - using ALL VARIABLES (198 vars) #### 
 # Build and fit a RF model using all available variables 
 # code source: Practical Data Science with R, Zumel N, Mount J, Manning Pub, 2014 
 # code source: https://www.r-bloggers.com/how-to-implement-random-forests-in-r/ 
@@ -234,7 +261,7 @@ modelAll
 summary(modelAll)
 str(modelAll)
 
-modelAll_CM_train_plot  <- ggplot(train, aes(x=LCTYPE, y=modelAll$predicted, 
+modelAll_CM_train_plot <- ggplot(train, aes(x=LCTYPE, y=modelAll$predicted, 
                                              color = LCTYPE)) + 
   geom_boxplot(size=1, show.legend = FALSE) + 
   geom_jitter(size=2, show.legend = FALSE) + 
@@ -248,7 +275,7 @@ modelAll_CM_train_plot  <- ggplot(train, aes(x=LCTYPE, y=modelAll$predicted,
 modelAll_CM_train_plot 
 
 # Predict Output  
-modelAllPredicted <- predict(modelAll,test, type="class") 
+modelAllPredicted <- predict(modelAll, test, type="class") 
 summary(modelAllPredicted) 
 
 # Confusion Matrix: classification accuracy (Actual VS Predicted) 
@@ -301,22 +328,6 @@ title(main = paste("Random Forest Model Results: ERROR RATE (", varsAll, " vars)
 # Extract info about Important Variables for the model 
 varImp <- importance (modelAll) 
 
-# just checking generated Important Variables 
-# str(varImp)
-# dim(varImp) 
-# is.recursive(varImp)
-# is.atomic(varImp)
-# MDA <- (sort(varImp[, "MeanDecreaseAccuracy"], decreasing = TRUE))
-# MDA <- (sort(varImp[1:22, "MeanDecreaseAccuracy"], decreasing = TRUE)) 
-# MDA
-# labels(MDA)
-# plot(MDA)
-# 
-# MDG <- (sort(varImp[, "MeanDecreaseGini"], decreasing = TRUE)) 
-# MDG 
-#plot(MDG)
-
-
 # Counts the number of variables 
 # (used later to plot variables VS error rate for various models run) 
 varsAll <- length(varImp[,1])   
@@ -339,7 +350,45 @@ varImpPlot(modelAll, type=2, n.var=varsAll,
            las=2) 
 
 
-# RANDOM FOREST model - using Top variables (30 vars or something diff.) #### 
+# PREDICTIONS: ALL variables model #### 
+
+modelAllPredictedNoLabels <- predict(modelAll, noLabels, type="class")
+summary(modelAllPredictedNoLabels)
+str(modelAllPredictedNoLabels)
+
+
+# Plot Actuals - TRAINING data  
+actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
+  geom_bar(fill="darkseagreen") + 
+  labs(title="RF Model: ACTUAL Crop Types", 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+#actuals_plot
+
+# Plot Predicted - modelAll NO-LABELS data (kelso_to_be_classified.csv)
+
+modelAllPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelAllPredictedNoLabels)) + 
+  geom_bar(fill="#6787b7") + 
+  labs(title=paste("RF Model (", varsAll, " variables): \nPREDICTED Crop Types for NO_LABELS dataset"), 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+#modelAllPredictedNoLabels_plot
+
+# Plot actuals and no-labels precdictions 
+grid.arrange(actuals_plot, modelAllPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
+
+
+# create output file with Kelso classified crops 
+write.csv(modelAllPredictedNoLabels, file = "Kelso_classified_crops_AllVariables.csv") 
+
+
+# RANDOM FOREST model - using TOP variables (30 vars or something diff.) #### 
 # ==> USER INPUT: numbner of variables to use in model ####
 
 # enter number of variables for the model to use, 
@@ -354,7 +403,8 @@ varsTop
 
 # Build basic model 
 modelTopVars <- randomForest(x=train[,varTopImp], y=train$LCTYPE, mtry=mTry, 
-                             ntree=nTree, nodesize=nodeSize, importance=T)
+                             ntree=nTree, nodesize=nodeSize, importance=T, 
+                             na.action = na.omit)
 modelTopVars
 summary(modelTopVars)
 str(modelTopVars)
@@ -374,7 +424,7 @@ modelTopVars_CM_train_plot
 
 
 # Predict Output  
-modelTopVarsPredicted = predict(modelTopVars,test)
+modelTopVarsPredicted <- predict(modelTopVars,test)
 summary(modelTopVarsPredicted)
 
 # Confusion Matrix: classification accuracy (Actual VS Predicted) 
@@ -441,7 +491,47 @@ varImpPlot(modelTopVars, type=2, n.var=varsTop,
            las=2)
 
 
-# RANDOM FOREST model - using Top variables (13 vars or something diff.) #### 
+# PREDICTIONS: TOP variables model #### 
+
+modelTopVarsPredictedNoLabels <- predict(modelTopVars, noLabels, type="class")
+summary(modelTopVarsPredictedNoLabels)
+str(modelTopVarsPredictedNoLabels)
+
+
+# Plot Actuals - TRAINING data  
+actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
+  geom_bar(fill="darkseagreen") + 
+  labs(title="RF Model: ACTUAL Crop Types", 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+#actuals_plot
+
+
+# Plot Predicted - model TopVariables NO-LABELS data (kelso_to_be_classified.csv)
+modelTopVarsPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelTopVarsPredictedNoLabels)) + 
+  geom_bar(fill="#6787b7") + 
+  labs(title=paste("RF Model (", varsTop, " variables): \nPREDICTED Crop Types for NO_LABELS dataset"), 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+#modelTopVarsPredictedNoLabels_plot
+
+# Plot actuals and no-labels precdictions 
+grid.arrange(actuals_plot, modelTopVarsPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
+
+
+# create output file with Kelso classified crops 
+write.csv(modelTopVarsPredictedNoLabels, file = "Kelso_classified_crops_TopVariables.csv") 
+
+
+
+
+# RANDOM FOREST model - using LESS variables (13 vars or something diff.) #### 
 # ==> USER INPUT: numbner of variables to use in model #### 
 
 # enter number of variables for the model to use, 
@@ -543,6 +633,45 @@ varImpPlot(modelLessVars, type=2, n.var=varsLess,
 
 
 
+# PREDICTIONS: LESS variables model #### 
+
+modelLessVarsPredictedNoLabels <- predict(modelLessVars, noLabels, type="class")
+summary(modelLessVarsPredictedNoLabels)
+str(modelLessVarsPredictedNoLabels)
+
+
+# Plot Actuals - TRAINING data  
+actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
+  geom_bar(fill="darkseagreen") + 
+  labs(title="RF Model: ACTUAL Crop Types", 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+#actuals_plot
+
+# Plot Predicted - modelLessVars NO-LABELS data (kelso_to_be_classified.csv)
+
+modelLessVarsPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelLessVarsPredictedNoLabels)) + 
+  geom_bar(fill="#6787b7") + 
+  labs(title=paste("RF Model (", varsLess, " variables): \nPREDICTED Crop Types for NO_LABELS dataset"), 
+       x="Crop Type", 
+       y="No. fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme
+
+#modelLessVarsPredictedNoLabels_plot
+
+# Plot actuals and no-labels precdictions 
+grid.arrange(actuals_plot, modelLessVarsPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
+
+
+# create output file with Kelso classified crops 
+write.csv(modelLessVarsPredictedNoLabels, file = "Kelso_classified_crops_LessVariables.csv") 
+
+
 # RANDOM FOREST model - Plots: Actual VS Predicted #### 
 
 # Plot Actuals Training data  
@@ -596,8 +725,8 @@ grid.arrange(actuals_plot, modelAll_plot, modelTopVars_plot, modelLessVars_plot,
 
 # RANDOM FOREST models - Summary Results #### 
 # Collect and graph number of variables used VS model Error Rate 
-# OOB (error rate) for a specific model where ntree=100 can be found 
-# by using this command, example: modelAll$err.rate[100,1] 
+# OOB (error rate) for a specific model where ntree=300 can be found 
+# by using this command, example: modelAll$err.rate[300,1] 
 
 # Models Results 
 rfResults <- data.frame(
