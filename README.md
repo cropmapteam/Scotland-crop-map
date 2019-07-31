@@ -1,13 +1,14 @@
 # Scotland-crop-map: Analysis Instructions
-# Author: Beata Mielcarek 
-# Last updated: 31 July 2019 
+Author: Beata Mielcarek 
+Last updated: 31 July 2019 
+
 
 Analysis folder contains datasets and R code for analysing the Scottish crops data. 
 Download all files (datasets and code) into the same folder before running the code. 
 
 
   SYSTEM REQUIREMENTS 
-================
+=======================
  - Latest R version from https://www.r-project.org/ 
  - Latest RStudio from https://www.rstudio.com/products/rstudio/download/ 
  - Install Packages listed at the beginning of each R code 
