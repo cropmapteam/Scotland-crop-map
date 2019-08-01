@@ -149,6 +149,7 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
         #   the image contains no RS data
         if dbg:
             print("Testing if entire window is nodata for img {}".format(fname))
+            print("Window Shape", the_window.shape)
 
         first = the_window[0][0]
         last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
