@@ -18,8 +18,8 @@
 # CLEAR EMVIRONMENT: PLOTS AND CONSOLE WINDOWS 
 ls() 
 rm(list=ls())
-# graphics.off()  # remove Plots 
-cat("\014")     # remove Console text 
+graphics.off()    # remove Plots 
+cat("\014")       # remove Console text 
 
 
 # R PACKAGES #### 
@@ -29,17 +29,17 @@ library(lattice)        # for multipanel plots
 library(grid)           # for displaying multiple graphs on same page 
 library(gridExtra)      # for displaying multiple graphs on same page 
 library(ggsn)           # for displaying multiple graphs on same page
-library(TeachingDemos)   # for capturing commands and Console output in txt file
-# library(emojifont)      # for displaying emojis 
+library(TeachingDemos)  # for capturing commands and Console output in txt file
+# library(emojifont)    # for displaying emojis 
 
 
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-#pdf(file="Kelso_Exploratory_Analysis.pdf")
+pdf(file="Kelso_Exploratory_Analysis.pdf")
 
 # create console output file (TXT) 
-#txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
+txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # BRANDING TEMPLATES: Colors, Emojis, Titles #### 
@@ -51,7 +51,7 @@ library(TeachingDemos)   # for capturing commands and Console output in txt file
 # R default color palette 
 palette("default")
 r_color <- colors()
-head(r_color, 50)
+# head(r_color, 50)
 
 # My brand colors palette 
 myColors <- c("#6787b7", "#00AFBB", "#CC79A7", "#0072B2", 
@@ -95,11 +95,12 @@ summary(allData)
 # Arable=1, Permanent Crops=2, Permanent Grassland=3 
 allData$LCgroup <- ifelse(allData$LCGROUP == "Arable", 1, 
                    ifelse(allData$LCGROUP == "Permanent Crops", 2, 3))
-names(allData) 
-allData$LCgroup 
+#names(allData) 
+#allData$LCgroup 
 
 levels(allData$LCTYPE)
 levels(allData$LCGROUP)
+
 
 # EXPLORATORY ANALYSIS #### 
 
@@ -236,7 +237,7 @@ ggplot(data=subset(allData, AREA > 20000), aes(x=LCGROUP)) +
 ggplot(data=subset(allData, AREA > 20), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on LARGE fields \n(AREA greather than 20 hectares)", 
+        labs(title="Land Cover Type (LCTYPE) on LARGE fields \n(AREA greather than 20,000 sq-km)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -336,7 +337,7 @@ table(droplevels(allData$LCTYPE))
 
 # Remove useless variables #### 
 str(allData)
-## we're left with data.frame:	393 obs. of  64 variables 
+## we're left with data.frame:	389 obs. of  300 variables 
 
 
 # make a list of RANGE variables 
@@ -394,28 +395,28 @@ meanVVtime$VVmean <- meanVVtime$values
 str(meanVVtime)
 
 # Recode Factor variable of month to Integer 
-meanVVtime$ind <- as.integer(meanVVtime$ind)
-str(meanVVtime)
+#meanVVtime$ind <- as.integer(meanVVtime$ind)
+#str(meanVVtime)
 
 # Export stacked dataset and check that it's correct 
-#write.csv(meanVVtime, "meanVVtime.csv")
-#    theme(legend.position="bottom", legend.direction = "horizontal") + 
+#write.csv(meanVVtime, "meanVVtime.csv") 
 
 # print x labels at 90 degree 
 # solution https://stackoverflow.com/questions/36682451/rotating-x-label-text-in-ggplot 
 
-vv_mean_plot <- ggplot(data=meanVVtime, aes(x=ind, y=values, colour=LCTYPE )) +
-    geom_line() + 
-    theme(legend.position="none") + 
-    labs(title="VV Mean by Month by Land Cover Type", 
-         y = "VV mean") + 
-    scale_x_discrete(name = "2018", labels="ind") + 
-    theme(axis.text.x=element_text(angle=90,hjust=1)) + 
-    plot_subtitle + 
-    plot_caption + 
-    plot_theme 
-
-vv_mean_plot 
+vv_mean_plot <- ggplot(data=meanVVtime, aes(x=ind, y=VVmean, colour=LCTYPE)) + 
+  geom_line() + 
+  geom_smooth() + 
+  scale_x_discrete(name = "2018") + 
+  theme(axis.text.x=element_text(angle=90,hjust=1)) + 
+  labs(title="VV Mean by Month by Land Cover Type", 
+       y = "VV mean") + 
+#  theme(legend.position="bottom", legend.direction = "horizontal") + 
+  theme(legend.position="none") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme 
+vv_mean_plot
 
 
 # Create Time-Series and Plot VH mean #### 
@@ -425,29 +426,29 @@ meanVHtime <- cbind(meanVHdata[1:5], stack(meanVHdata[6:54]), row.names = NULL)
 str(meanVHtime)
 
 # Replace the name given to column when stacked
-meanVHtime$VVmean <- meanVHtime$values
+meanVHtime$VHmean <- meanVHtime$values
 str(meanVHtime)
 
 # Recode Factor variable of month to Integer 
-meanVHtime$ind <- as.integer(meanVHtime$ind)
-str(meanVHtime)
+#meanVHtime$ind <- as.integer(meanVHtime$ind)
+#str(meanVHtime)
 
 # Export stacked dataset and check that it's correct 
 #write.csv(meanVHtime, "meanVHtime")
 
-vh_mean_plot <- ggplot(data=meanVHtime, aes(x=ind, y=values, colour=LCTYPE )) +
+vh_mean_plot <- ggplot(data=meanVHtime, aes(x=ind, y=VHmean, colour=LCTYPE )) +
     geom_line() + 
-    theme(legend.position="bottom", legend.direction = "horizontal") + 
-#    theme(legend.position="none") + 
     scale_x_discrete(name = "2018") + 
     theme(axis.text.x=element_text(angle=90,hjust=1)) +
     labs(title="VH Mean by Month by Land Cover Type", 
          y = "VH mean") + 
+#  theme(legend.position="bottom", legend.direction = "horizontal") + 
+  theme(legend.position="none") + 
     plot_subtitle + 
     plot_caption + 
     plot_theme 
-
 vh_mean_plot
+
 
 grid.arrange(vv_mean_plot, vh_mean_plot)
 
@@ -463,25 +464,25 @@ varVVtime$VVvar <- varVVtime$values
 str(varVVtime)
 
 # Recode Factor variable of month to Integer 
-varVVtime$ind <- as.integer(varVVtime$ind)
-str(varVVtime)
+#varVVtime$ind <- as.integer(varVVtime$ind)
+#str(varVVtime)
 
 # Export stacked dataset and check that it's correct 
 #write.csv(varVVtime, "varVVtime")
 
-vv_var_plot <- ggplot(data=varVVtime, aes(x=ind, y=values, colour=LCTYPE )) +
-    geom_line() + 
-#    theme(legend.position="bottom", legend.direction = "horizontal") + 
-    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018") + 
-    theme(axis.text.x=element_text(angle=90,hjust=1)) +
-    labs(title="VV Variance by Month by Land Cover Type", 
+vv_var_plot <- ggplot(data=varVVtime, aes(x=ind, y=VVvar, colour=LCTYPE )) +
+  geom_line() + 
+  scale_x_discrete(name = "2018") + 
+  theme(axis.text.x=element_text(angle=90,hjust=1)) +
+  labs(title="VV Variance by Month by Land Cover Type", 
          y = "VV variance") + 
+#  theme(legend.position="bottom", legend.direction = "horizontal") + 
+  theme(legend.position="none") + 
     plot_subtitle + 
     plot_caption + 
     plot_theme 
-
 vv_var_plot
+
 
 # Create Time-Series and Plot VH variance #### 
 # draft code by Zarah Pattison, Env. Researcher on ScotCropMap team 
@@ -491,33 +492,34 @@ varVHtime <- cbind(varVHdata[1:5], stack(varVHdata[6:54]), row.names = NULL)
 str(varVHtime)
 
 # Replace the name given to column when stacked
-varVHtime$VVvar <- varVHtime$values
+varVHtime$VHvar <- varVHtime$values
 str(varVHtime)
 
 # Recode Factor variable of month to Integer 
-varVHtime$ind <- as.integer(varVHtime$ind)
-str(varVHtime)
+#varVHtime$ind <- as.integer(varVHtime$ind)
+#str(varVHtime)
 
 # Export stacked dataset and check that it's correct 
 #write.csv(varVHtime, "varVHtime")
 
-vh_var_plot <- ggplot(data=varVHtime, aes(x=ind, y=values, colour=LCTYPE )) +
-    geom_line() + 
-#    theme(legend.position="bottom", legend.direction = "horizontal") + 
-    theme(legend.position="none") + 
-    scale_x_discrete(name = "2018") + 
-    theme(axis.text.x=element_text(angle=90,hjust=1)) +
-    labs(title="VH Variance by Month by Land Cover Type", 
-         y = "VH variance") + 
-    plot_subtitle + 
-    plot_caption + 
-    plot_theme 
 
-vh_var_plot
+vh_var_plot <- ggplot(data=varVHtime, aes(x=ind, y=VHvar, colour=LCTYPE )) +
+  geom_line() + 
+  scale_x_discrete(name = "2018") + 
+  theme(axis.text.x=element_text(angle=90,hjust=1)) +
+  labs(title="VH Variance by Month by Land Cover Type", 
+       y = "VH variance") + 
+#  theme(legend.position="bottom", legend.direction = "horizontal") + 
+  theme(legend.position="none") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme 
+vh_var_plot 
+
 
 grid.arrange(vv_var_plot, vh_var_plot)
 
-
+# final VV/VH plots #### 
 # Plot VV means & vars 
 grid.arrange(vv_mean_plot, vv_var_plot) 
 
@@ -531,3 +533,4 @@ grid.arrange(vh_mean_plot, vh_var_plot)
 dev.list() 
 txtStop()
 dev.off() 
+
