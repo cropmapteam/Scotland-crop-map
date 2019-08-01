@@ -88,7 +88,7 @@ def fetch_zonal_polygons_from_shapefile(shp_fname):
     return zonal_polygons
 
 
-def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1, dbg=False):
+def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1, dbg=True):
     """
     use rasterio to fetch a sub-window from a raster
 
@@ -147,6 +147,9 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
         # TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
         #  possibly unreliable test to check if the returned window is all nodata values i.e. the part of
         #   the image contains no RS data
+        if dbg:
+            print("Testing if entire window is nodata for img {}".format(fname))
+
         first = the_window[0][0]
         last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
         if np.isnan(first) and np.isnan(last):
