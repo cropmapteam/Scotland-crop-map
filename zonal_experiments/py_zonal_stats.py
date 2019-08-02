@@ -151,10 +151,18 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
             print("Testing if entire window is nodata for img {}".format(fname))
             print("Window Shape", the_window.shape, the_window.shape[0], the_window.shape[1])
 
-        first = the_window[0][0]
-        last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
-        if np.isnan(first) and np.isnan(last):
+        if the_window.shape[1] == 0:
             window_all_nodata = True
+        else:
+            first = the_window[0][0]
+            last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
+            if np.isnan(first) and np.isnan(last):
+                window_all_nodata = True
+
+        # first = the_window[0][0]
+        # last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
+        # if np.isnan(first) and np.isnan(last):
+        #     window_all_nodata = True
 
         if dbg:
             print(the_window.size)
