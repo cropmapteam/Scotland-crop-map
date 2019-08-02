@@ -89,7 +89,7 @@ def fetch_zonal_polygons_from_shapefile(shp_fname):
     return zonal_polygons
 
 
-def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1, dbg=True):
+def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1, dbg=False):
     """
     use rasterio to fetch a sub-window from a raster
 
