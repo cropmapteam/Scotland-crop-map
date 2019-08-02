@@ -153,17 +153,13 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
             print("Window Shape", the_window.shape, the_window.shape[0], the_window.shape[1])
 
         if the_window.shape[1] == 0:
+            # this will be the case if the requested window fell completly outside the extent of the image
             window_all_nodata = True
         else:
             first = the_window[0][0]
             last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
             if np.isnan(first) and np.isnan(last):
                 window_all_nodata = True
-
-        # first = the_window[0][0]
-        # last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
-        # if np.isnan(first) and np.isnan(last):
-        #     window_all_nodata = True
 
         if dbg:
             print(the_window.size)
@@ -205,6 +201,7 @@ def my_variance(x):
     :return:
     """
     return np.var(x)
+
 
 # TODO write the csv directly in the form that write_data_to_csv_for_ml() provides to avoid writing, reading and then
 #  rewriting the csv
@@ -438,15 +435,5 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
 
-#def main():
-#    zones_shp_fname = "/data/Ground_Truth_Polys/kelso/ground_truth_v5_2018_inspection_kelso_250619.shp"
-#    image_metadata_fname = "data/image_bounds_meta.csv"
-#    output_path = "/home/geojamesc/geocrud/zonal_stats"
-
-#    fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
-
-
 if __name__ == "__main__":
     fetch_zonal_stats_for_shapefile()
-    #fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
-    #main()
