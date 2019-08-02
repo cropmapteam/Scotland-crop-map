@@ -16,23 +16,22 @@ from py_zonal_stats import mp_fetch_zonal_stats_for_shapefile
 @click.argument('output_path', type=click.Path(exists=True))
 @click.argument('num_of_cores', type=click.IntRange(min=1, max=os.cpu_count()))
 def fetch_zonal_stats_for_shapefiles(path_to_shapefiles, image_metadata_fname, output_path, num_of_cores):
+    """
+
+    :param path_to_shapefiles: is the folder of shapefiles we want to generate zonal statistics for
+    :param image_metadata_fname: the path to the image metadata i.e. data/image_bounds_meta.csv
+    :param output_path: where to output the zonal stats csvs
+    :param num_of_cores: the number of cpu cores to spread zonal stats over epcc vm has 16 so specify 12
+    :return:
+    """
     jobs = []
-    # is the folder containing all of the shapefiles we want to generate zonal stats for
     path_to_shps = os.path.join(path_to_shapefiles, "*.shp")
-
-    # is a CSV describing which S1 images zonal stats are to found for
-    #image_metadata_fname = "data/image_bounds_meta.csv"
-
-    # is where the output zonal stats csv`s should be placed
-    #output_path = "/home/geojamesc/geocrud/zonal_stats/mpzs"
 
     # assemble jobs list: [[zones_shp_fname, image_metadata_fname, output_path], ...]
     # each item in the list is a new job that will processed
     for zones_shp_fname in glob.glob(path_to_shps):
         jobs.append([zones_shp_fname, image_metadata_fname, output_path])
 
-    # processed defaults to os.cpu_count
-    # the epcc vm has 16 cores so set to 12
     pool = Pool(processes=num_of_cores)
     pool.map(mp_fetch_zonal_stats_for_shapefile, jobs)
 
