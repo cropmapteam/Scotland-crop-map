@@ -9,6 +9,7 @@ import fiona
 import shapely
 from shapely.geometry import shape, Polygon
 from shapely.wkt import loads
+import click
 
 
 def get_aoi_from_shapefile(shp_fname, buffer_d=100):
@@ -393,6 +394,10 @@ def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
                 my_writer.writerow(ml_data)
 
 
+@click.command()
+@click.argument('zones_shp_fname', type=click.Path(exists=True))
+@click.argument('image_metadata_fname', type=click.Path(exists=True))
+@click.argument('output_path', type=click.Path(exists=True))
 def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path):
     # get image metadata which determines which images we collect zonal stats from
     image_metadata = fetch_image_metadata_from_csv_filtered(image_metadata_fname, zones_shp_fname, buffer_d=100)
@@ -433,13 +438,15 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
     write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
 
 
-def main():
-    zones_shp_fname = "/data/Ground_Truth_Polys/kelso/ground_truth_v5_2018_inspection_kelso_250619.shp"
-    image_metadata_fname = "data/image_bounds_meta.csv"
-    output_path = "/home/geojamesc/geocrud/zonal_stats"
+#def main():
+#    zones_shp_fname = "/data/Ground_Truth_Polys/kelso/ground_truth_v5_2018_inspection_kelso_250619.shp"
+#    image_metadata_fname = "data/image_bounds_meta.csv"
+#    output_path = "/home/geojamesc/geocrud/zonal_stats"
 
-    fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
+#    fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
 
 
 if __name__ == "__main__":
-    main()
+    fetch_zonal_stats_for_shapefile()
+    #fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, output_path)
+    #main()
