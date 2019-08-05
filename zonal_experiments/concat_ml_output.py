@@ -140,7 +140,7 @@ def concat_and_validate(path_to_zs_csvs, path_to_src_shps, zs_csv_ptn, output_cs
             num_features = len(shp_src)
             shp_counts[p_id] = num_features
 
-        expected_csv = os.path.join(path_to_zs_csvs, "scotland_full_training_{}_zonal_stats_for_ml.csv".format(p_id))
+        expected_csv = os.path.join(path_to_zs_csvs, "scotland_full_lpis_{}_zonal_stats_for_ml.csv".format(p_id))
         if os.path.exists(expected_csv):
             ml_csv_actual_count += 1
         else:
@@ -239,16 +239,23 @@ def concat_and_validate(path_to_zs_csvs, path_to_src_shps, zs_csv_ptn, output_cs
 
                         out_record_to_write = []
                         for i in range(1, upper_col_idx):
-                            out_record_to_write.append(out_record[i][1])
+                            #TODO - write the data to the final concat csv as non-strings
+                            # if i == 1:
+                            #     out_record_to_write.append(int(out_record[i][1]))
+                            # if (i > 1) and (i < 5):
+                            #     out_record_to_write.append(out_record[i][1])
+                            # else:
+                            #     out_record_to_write.append(float(out_record[i][1]))
 
+                            out_record_to_write.append(out_record[i][1])
                         my_writer.writerow(out_record_to_write)
 
 
 def main():
-    path_to_zs_csvs = "/home/james/Desktop/ZS_Scotland"
+    path_to_zs_csvs = "/home/james/geocrud/mpzs/for_ml"
     path_to_src_shps = "/home/james/geocrud/partitions"
     zs_csv_ptn = "*_for_ml.csv"
-    output_csv_fn = "/home/james/Desktop/scotland_labelled_data_for_ml.csv"
+    output_csv_fn = "/home/james/Desktop/scotland_unlabelled_data_for_ml.csv"
     concat_and_validate(path_to_zs_csvs, path_to_src_shps, zs_csv_ptn, output_csv_fn)
 
 
