@@ -30,13 +30,12 @@ def check_image_is_valid(fn):
     return is_valid
 
 
-def fetch_images():
+def fetch_images(pg_conn_str):
     """
 
     :return:
     """
     images = {}
-    pg_conn_str = "postgres://james:MopMetal3@localhost:5432/cropmaps"
     db = Postgres(pg_conn_str)
     sql = "SELECT * FROM geocrud.image_bounds_meta_isect_w_gt"
     rs = db.all(sql)
@@ -65,8 +64,9 @@ def clip_raster_to_shp_polygon(raster_to_clip_fn, shp_fn, out_raster_fn):
 
 
 def main():
+    pg_conn_str = ""
     path_to_gt_shapefiles = "/home/james/serviceDelivery/CropMaps/GroundTruth/Ground_Truth_V5+2018_Inspection/JRCC250619/indv_polys"
-    images = fetch_images()
+    images = fetch_images(pg_conn_str)
 
     for img_fname in images:
         if os.path.exists(img_fname):
