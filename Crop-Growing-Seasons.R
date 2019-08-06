@@ -2,18 +2,18 @@
 # AREA: Scotland 
 # Data source: Stephen Smith 
 # AUTHOR: Beata Mielcarek 
-# Date: 2 July 2019 
+# Date: 1 August 2019 
 
 # VERSION CONTROL #### 
 # v1 - initial data analysis 
-
+# v2-7 - time series 
 
 # R ENVIRONMENT #### 
 # CLEAR EMVIRONMENT: PLOTS AND CONSOLE WINDOWS 
 ls() 
 rm(list=ls())
 # graphics.off()  # remove Plots 
-cat("\014")     # remove Console text 
+cat("\014")       # remove Console text 
 
 
 # R PACKAGES #### 
@@ -23,17 +23,16 @@ library(lattice)        # for multipanel plots
 library(grid)           # for displaying multiple graphs on same page 
 library(gridExtra)      # for displaying multiple graphs on same page 
 library(ggsn)           # for displaying multiple graphs on same page
-library(TeachingDemos)   # for capturing commands and Console output in txt file
-# library(emojifont)      # for displaying emojis 
+library(TeachingDemos)  # for capturing commands and Console output in txt file
 
 
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-#pdf(file="Crop-Growing-Seasons_Analysis.pdf")
+pdf(file="Crop-Growing-Seasons_Analysis.pdf")
 
 # create console output file (TXT) 
-#txtStart(file="Crop-Growing-Seasons_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
+txtStart(file="Crop-Growing-Seasons_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # BRANDING TEMPLATES: Colors, Emojis, Titles #### 
@@ -45,13 +44,13 @@ library(TeachingDemos)   # for capturing commands and Console output in txt file
 # R default color palette 
 palette("default")
 r_color <- colors()
-head(r_color, 50)
+#head(r_color, 50)
 
 # My brand colors palette 
-myColors <- c("#6787b7", "#F4EDCA", "#CC79A7", "#0072B2", 
-              "#C3D7A4", "#56B4E9", "#E69F00", "#52854C", 
-              "saddlebrown", "#E7B800", "#999999", "darkseagreen", 
-              "#4E84C4", "#FFDB6D", "#FF6666", "#00AFBB")
+# myColors <- c("#6787b7", "#F4EDCA", "#CC79A7", "#0072B2", 
+#               "#C3D7A4", "#56B4E9", "#E69F00", "#52854C", 
+#               "saddlebrown", "#E7B800", "#999999", "darkseagreen", 
+#               "#4E84C4", "#FFDB6D", "#FF6666", "#00AFBB")
 
 # set palette to myColors - will overwrite R default palette!! 
 #myPalette <- palette(myColors) 
@@ -83,7 +82,7 @@ cropsData<- read.csv("crop-growing-seasons.csv")
 # DATASET CHECK #### 
 str(cropsData)
 
-# Delete useless variables: Notes, X, X.1, X.2  
+# Delete useless variables: Notes, X, X.1, X.2 (notes columns from original Excel file)
 cropsData <- subset(cropsData, select = -c(Notes, X, X.1, X.2)) 
 str(cropsData)
 # data.frame:	58 obs. of  15 variables
@@ -146,6 +145,7 @@ cropsData$December <- as.numeric(as.character(cropsData$December))
 str(cropsData)
 
 # Stack month columns 
+# warning message explanation: https://stackoverflow.com/questions/23534066/cbind-warnings-row-names-were-found-from-a-short-variable-and-have-been-discar 
 cropsTimeSeries <- cbind(cropsData[1:3], stack(cropsData[4:15]))
 str(cropsTimeSeries)
 
@@ -158,6 +158,7 @@ str(cropsTimeSeries)
 
 
 # GROWTH LIFECYCLE - Plot #### 
+# colors for geom_smooth(): https://stackoverflow.com/questions/24063163/how-to-add-manual-colors-for-a-ggplot2-geom-smooth-geom-line 
 ggplot(data=cropsTimeSeries, aes(x=ind, y=values, colour=LCTYPE )) +
     geom_line() + 
     geom_smooth() + 
