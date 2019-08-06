@@ -15,9 +15,6 @@ In the activated Virtual Environment, pip install:
 
 The run the required py script inside the Virtual Environment
 
-py_zonal_stats.py was tested to run inside a Python3 Virtual Environment with these libraries pip installed
-on the epcc VM on 160719.
-
 ### 1. Image Metadata
 
 When processing the S1 data we need metadata which tells us which images are available to be processed etc
@@ -56,12 +53,26 @@ masked out
 ### 3. Zonal Statistics
 
 Zonal Statistics which for a set of polygonal zones, provide for each polygonal zone summary statistics of the S1
-data present within the zone. These Zonal Statistics are what the random forest ml model is built from.
+data present within the zone. These Zonal Statistics are what the random forest ml model is built from and what
+are fed to the ml model in order to classify fields with a crop type.
 
 **py_zonal_stats.py**
 
 generates zonal statistics for all zones (segmented fields or ground-truth polygons) held in a shapefile from S1 images.
 This an alternative to generating zonal statistics in a desktop GIS like QGIS or ArcGIS etc.
+
+It can be run from the commandline by doing:
+
+(VirtualEnv)$ python py_zonal_stats.py ZONES_SHP_FNAME IMAGE_METADATA_FNAME OUTPUT_PATH
+
+where:
+
+ZONES_SHP_FNAME is the name of the shapefile containing the zones that zonal stats should be found for
+
+IMAGE_METADATA_FNAME is the path to the CSV describing the complete set of images that zonal stats should be captured from
+i.e. data\image_bounds_meta.csv inside this repo
+
+OUTPUT_PATH is where the output CSV files should be written
 
 **mp_py_zonal_stats.py**
 
@@ -71,7 +82,28 @@ Before mp_py_zonal_stats.py can be ran, the zones (segmented fields or ground-tr
 into a set of sub-shapefiles so that each job (run of py_zonal_stats.py) in the multiprocessing pool is presented with
 a different set of polygons to find zonal statistics for. One way to do this is to partition the zones using a standard
 Ordnance Survey 10km x 10km grid such that each sub-shapefile contains all zones whose centroid falls within the extent
-of a particular 10km x 10km gridsquare. 
+of a particular 10km x 10km gridsquare.
+
+Once the data has been partitioned into a set of shapefiles, it can be run from the commandline by doing:
+
+(VirtualEnv)$ python mp_py_zonal_stats.py PATH_TO_SHAPEFILES IMAGE_METADATA_FNAME OUTPUT_PATH NUM_OF_CORES
+
+where
+
+PATH_TO_SHAPEFILES is the path to the folder containing the shapefiles that zonal stats should be found for
+
+IMAGE_METADATA_FNAME is the path to the CSV describing the complete set of images that zonal stats should be captured from
+i.e. data\image_bounds_meta.csv inside this repo
+
+OUTPUT_PATH is where the output csv files should be written
+
+NUM_OF_CORES set the number of cpu cores to be allocated to the multiprocessing pool.
+
+**concat_ml_output.py**
+
+mp_py_zonal_stats.py will produce as output a load of _for_ml.csv files containing the zonal stats for all polygons
+within a particular partition. concat_ml_output.py should be used to concatenate all of these individual files into
+1 big csv file. 
 
 ### 4. Data preperation for (C)NN
 
