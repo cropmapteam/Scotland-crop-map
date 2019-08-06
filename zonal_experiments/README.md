@@ -97,7 +97,8 @@ i.e. data\image_bounds_meta.csv inside this repo
 
 OUTPUT_PATH is where the output csv files should be written
 
-NUM_OF_CORES set the number of cpu cores to be allocated to the multiprocessing pool.
+NUM_OF_CORES set the number of cpu cores to be allocated to the multiprocessing pool. Set to a number
+fewer than the number of cpu cores on the machine.
 
 **concat_ml_output.py**
 
