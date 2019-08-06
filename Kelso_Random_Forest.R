@@ -39,26 +39,86 @@ library(TeachingDemos)  # for capturing commands and Console output in txt file
 
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
-# create Plots output file (PDF) 
-#pdf(file="Kelso_Random_Forest.pdf")
+# nTree=100 
+# create Plots output file (PDF) and Commands output file (TXT) 
+#pdf(file="Kelso_Random_Forest_50-50_nTree100_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_50-50_nTree100_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
-# create Commands output file (TXT) 
-#txtStart(file="Kelso_Random_Forest.txt", commands=TRUE, results=TRUE, append=FALSE) 
+#pdf(file="Kelso_Random_Forest_60-40_nTree100_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_60-40_nTree100_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_70-30_nTree100_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_70-30_nTree100_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_80-20_nTree100_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_80-20_nTree100_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+# nTree=200
+#pdf(file="Kelso_Random_Forest_50-50_nTree200_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_50-50_nTree200_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_60-40_nTree200_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_60-40_nTree200_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_70-30_nTree200_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_70-30_nTree200_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_80-20_nTree200_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_80-20_nTree200_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+# nTree=300 
+#pdf(file="Kelso_Random_Forest_50-50_nTree300_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_50-50_nTree300_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_60-40_nTree300_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_60-40_nTree300_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_70-30_nTree300_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_70-30_nTree300_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_80-20_nTree300_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_80-20_nTree300_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+# nTree=400 
+#pdf(file="Kelso_Random_Forest_50-50_nTree400_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_50-50_nTree400_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_60-40_nTree400_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_60-40_nTree400_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_70-30_nTree400_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_70-30_nTree400_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_80-20_nTree400_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_80-20_nTree400_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+# nTree=500 
+#pdf(file="Kelso_Random_Forest_50-50_nTree500_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_50-50_nTree500_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_60-40_nTree500_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_60-40_nTree500_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_70-30_nTree500_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_70-30_nTree500_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
+
+#pdf(file="Kelso_Random_Forest_80-20_nTree500_mTry13.pdf")
+#txtStart(file="Kelso_Random_Forest_80-20_nTree500_mTry13.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # ==> USER INPUT: SETUP model parameters: Train/Test split, RF params #### 
 
 # Train/Test dataset split 
 # Model is trained in TRAIN dataset, an then tested on TEST dataset 
-trainDataSplit <- 0.6
+trainDataSplit <- 0.8
 testDataSplit <- (1 - trainDataSplit) 
 
 # ntree - Number of trees to grow. 
 # mtry - Number of variables randomly sampled as candidates at each split. 
 #   By default, randomForest() function sets m = sqrt(p) variables. 
 # nodesize - Minimum size of terminal nodes. 
-nTree = 300 
-mTry = 7 
+nTree = 500
+mTry = 13
 nodeSize = 1   # leave default=1 
 
 # create small dataframe to collect initial parameters info 
@@ -78,7 +138,7 @@ modelParams
 # R default color palette 
 palette("default")
 r_color <- colors()
-head(r_color, 50)
+#head(r_color, 50)
 
 # My brand colors palette 
 myColors <- c("#6787b7", "#F4EDCA", "#CC79A7", "#0072B2", 
@@ -140,6 +200,7 @@ length(na.omit(noLabels))
 # remove NA's 
 noLabels <- noLabels[complete.cases(noLabels), ]  
 str(noLabels) 
+# data.frame:	7583 obs. of  297 variables
 
 
 # LABELLED DATA CLEANUP: remove variables, remove crop types  #### 
@@ -214,22 +275,42 @@ trainIndex <- sample(nrow(keyData), trainDataSplit*nrow(keyData))
 # use "droplevel" to 
 train <- droplevels(keyData[trainIndex, ]) 
 test <- droplevels(keyData[-trainIndex, ]) 
+
+str(keyData)
+# 70/30 - data.frame:	333 obs. of  198 variables
+
 str(train) 
+# 70/30 - data.frame:	233 obs. of  198 variables
+
 str(test)
+# 70/30 - data.frame:	100 obs. of  198 variables
+
 
 # check that there is at least one observatin for each LCTYPE in each dataset 
+table(droplevels(keyData$LCTYPE))
 table(droplevels(train$LCTYPE))
 table(droplevels(test$LCTYPE)) 
+
+keyDataLCTYPE <- ggplot(keyData, aes(x=LCTYPE)) + 
+  geom_bar(fill="red") + 
+  labs(title=paste("Land Cover Type (LCTYPE) - ALL DATA dataset"), 
+       x="Land Cover Type (LCTYPE)", 
+       y="Number of farm fields") + 
+  plot_subtitle + 
+  plot_caption + 
+  plot_theme 
+keyDataLCTYPE
 
 trainLCTYPE <- ggplot(train, aes(x=LCTYPE)) + 
         geom_bar(fill="darkseagreen") + 
         labs(title=paste("Land Cover Type (LCTYPE) - TRAIN dataset (", trainDataSplit, " data split)"), 
              x="Land Cover Type (LCTYPE)", 
              y="Number of farm fields") + 
+        ylim(0, 100) + 
         plot_subtitle + 
         plot_caption + 
         plot_theme 
-
+trainLCTYPE 
 
 # Plot by LCTYPE (Land Cover Type) 
 testLCTYPE <- ggplot(test, aes(x=LCTYPE)) + 
@@ -237,11 +318,14 @@ testLCTYPE <- ggplot(test, aes(x=LCTYPE)) +
         labs(title=paste("Land Cover Type (LCTYPE) - TEST dataset (", testDataSplit, " data split)"), 
              x="Land Cover Type (LCTYPE)", 
              y="Number of farm fields") + 
+        ylim(0, 100) + 
         plot_subtitle + 
         plot_caption + 
         plot_theme 
+testLCTYPE 
 
-grid.arrange(trainLCTYPE, testLCTYPE)
+        
+grid.arrange(keyDataLCTYPE, trainLCTYPE, testLCTYPE)
 
 
 # RANDOM FOREST model - using ALL VARIABLES (198 vars) #### 
@@ -278,11 +362,12 @@ modelAll_CM_train_plot
 modelAllPredicted <- predict(modelAll, test, type="class") 
 summary(modelAllPredicted) 
 
-# Confusion Matrix: classification accuracy (Actual VS Predicted) 
+# Confusion Matrix (1): classification accuracy (Actual VS Predicted) 
 modelAll_CM <- table(test$LCTYPE, modelAllPredicted, dnn = c("Actual", "Predicted"))
 modelAll_CM 
 summary(modelAll_CM)
 str(modelAll_CM)
+
 
 modelAll_CM_test_plot <- ggplot(test, aes(x=LCTYPE, y=modelAllPredicted, 
                                            color = LCTYPE)) + 
@@ -298,9 +383,15 @@ modelAll_CM_test_plot
 
 grid.arrange(modelAll_CM_train_plot, modelAll_CM_test_plot) 
 
+# Confusion Matrix (2) and other stats on TEST dataset 
+modelAll_conf <- confusionMatrix(test$LCTYPE, modelAllPredicted)
+modelAll_conf
+str(modelAll_conf)
+
 
 # Model Accuracy 
-modelAll_Acc <- mean(modelAllPredicted == test$LCTYPE) 
+#modelAll_Acc <- mean(modelAllPredicted == test$LCTYPE) 
+modelAll_Acc <- mean(modelAllPredicted == (as.character(test$LCTYPE)))
 modelAll_Acc 
 
 
@@ -366,7 +457,7 @@ actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
   plot_subtitle + 
   plot_caption + 
   plot_theme
-#actuals_plot
+actuals_plot
 
 # Plot Predicted - modelAll NO-LABELS data (kelso_to_be_classified.csv)
 
@@ -378,14 +469,26 @@ modelAllPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelAllPredictedNoLabe
   plot_subtitle + 
   plot_caption + 
   plot_theme
-#modelAllPredictedNoLabels_plot
+modelAllPredictedNoLabels_plot
 
 # Plot actuals and no-labels precdictions 
 grid.arrange(actuals_plot, modelAllPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
 
 
 # create output file with Kelso classified crops 
-write.csv(modelAllPredictedNoLabels, file = "Kelso_classified_crops_AllVariables.csv") 
+
+KelsoCropsAll <- cbind.data.frame(noLabels, modelAllPredictedNoLabels)
+str(KelsoCropsAll)
+#head(KelsoCropsAll, n=5)
+#tail(KelsoCropsAll, n=5)
+
+# remove all variables except FID_1 and the classification result 
+KelsoClassifiedCropsAll <- subset(KelsoCropsAll, select = c(FID_1, modelAllPredictedNoLabels)) 
+str(KelsoClassifiedCropsAll)
+#head(KelsoClassifiedCropsAll, n=5)
+#tail(KelsoClassifiedCropsAll, n=5)
+
+write.csv(KelsoClassifiedCropsAll, file = "Kelso_classified_crops_result_from_AllVariables_Model.csv") 
 
 
 # RANDOM FOREST model - using TOP variables (30 vars or something diff.) #### 
@@ -427,7 +530,7 @@ modelTopVars_CM_train_plot
 modelTopVarsPredicted <- predict(modelTopVars,test)
 summary(modelTopVarsPredicted)
 
-# Confusion Matrix: classification accuracy (Actual VS Predicted) 
+# Confusion Matrix (1): classification accuracy (Actual VS Predicted) 
 modelTopVars_CM <- table(test$LCTYPE, modelTopVarsPredicted, dnn = c("Actual", "Predicted"))
 modelTopVars_CM 
 summary(modelTopVars_CM)
@@ -448,9 +551,17 @@ modelTopVars_CM_test_plot
 
 grid.arrange(modelTopVars_CM_train_plot, modelTopVars_CM_test_plot)
 
+
+# Confusion Matrix (2) and other stats on TEST dataset 
+modelTopVars_conf <- confusionMatrix(test$LCTYPE, modelTopVarsPredicted)
+modelTopVars_conf
+str(modelTopVars_conf)
+
+
 # Model Accuracy 
-modelTopVars_Acc <- mean(modelTopVarsPredicted == test$LCTYPE) 
+modelTopVars_Acc <- mean(modelTopVarsPredicted == (as.character(test$LCTYPE)))
 modelTopVars_Acc 
+
 
 # Error Rate (err.rate) 
 plot(modelTopVars$err.rate[,1], 
@@ -507,7 +618,7 @@ actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
   plot_subtitle + 
   plot_caption + 
   plot_theme
-#actuals_plot
+actuals_plot
 
 
 # Plot Predicted - model TopVariables NO-LABELS data (kelso_to_be_classified.csv)
@@ -519,15 +630,26 @@ modelTopVarsPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelTopVarsPredict
   plot_subtitle + 
   plot_caption + 
   plot_theme
-#modelTopVarsPredictedNoLabels_plot
+modelTopVarsPredictedNoLabels_plot
 
 # Plot actuals and no-labels precdictions 
 grid.arrange(actuals_plot, modelTopVarsPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
 
 
 # create output file with Kelso classified crops 
-write.csv(modelTopVarsPredictedNoLabels, file = "Kelso_classified_crops_TopVariables.csv") 
 
+KelsoCropsTop <- cbind.data.frame(noLabels, modelTopVarsPredictedNoLabels)
+str(KelsoCropsTop)
+#head(KelsoCropsTop, n=5)
+#tail(KelsoCropsTop, n=5)
+
+# remove all variables except FID_1 and the classification result 
+KelsoClassifiedCropsTop <- subset(KelsoCropsTop, select = c(FID_1, modelTopVarsPredictedNoLabels)) 
+str(KelsoClassifiedCropsTop)
+#head(KelsoClassifiedCropsTop, n=5)
+#tail(KelsoClassifiedCropsTop, n=5)
+
+write.csv(KelsoClassifiedCropsTop, file = "Kelso_classified_crops_result_from_TopVariables_Model.csv") 
 
 
 
@@ -589,9 +711,17 @@ modelLessVars_CM_test_plot
 grid.arrange(modelLessVars_CM_train_plot, modelLessVars_CM_test_plot) 
 
 
+# Confusion Matrix (2) and other stats on TEST dataset 
+modelLessVars_conf <- confusionMatrix(test$LCTYPE, modelLessVarsPredicted)
+modelLessVars_conf
+str(modelLessVars_conf)
+
+
+
 # Model Accuracy 
-modelLessVars_Acc <- mean(modelLessVarsPredicted == test$LCTYPE) 
-modelLessVars_Acc
+modelLessVars_Acc <- mean(modelLessVarsPredicted == (as.character(test$LCTYPE))) 
+modelLessVars_Acc 
+
 
 # Error Rate (err.rate) 
 plot(modelLessVars$err.rate[,1], 
@@ -649,7 +779,7 @@ actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
   plot_subtitle + 
   plot_caption + 
   plot_theme
-#actuals_plot
+actuals_plot
 
 # Plot Predicted - modelLessVars NO-LABELS data (kelso_to_be_classified.csv)
 
@@ -662,14 +792,26 @@ modelLessVarsPredictedNoLabels_plot <- ggplot(noLabels, aes(x=modelLessVarsPredi
   plot_caption + 
   plot_theme
 
-#modelLessVarsPredictedNoLabels_plot
+modelLessVarsPredictedNoLabels_plot
 
 # Plot actuals and no-labels precdictions 
 grid.arrange(actuals_plot, modelLessVarsPredictedNoLabels_plot, nrow = 2, ncol = NULL) 
 
 
 # create output file with Kelso classified crops 
-write.csv(modelLessVarsPredictedNoLabels, file = "Kelso_classified_crops_LessVariables.csv") 
+
+KelsoCropsLess <- cbind.data.frame(noLabels, modelLessVarsPredictedNoLabels)
+str(KelsoCropsLess)
+#head(KelsoCropsLess, n=5)
+#tail(KelsoCropsLess, n=5)
+
+# remove all variables except FID_1 and the classification result 
+KelsoClassifiedCropsLess <- subset(KelsoCropsLess, select = c(FID_1, modelLessVarsPredictedNoLabels)) 
+str(KelsoClassifiedCropsLess)
+#head(KelsoClassifiedCropsLess, n=5)
+#tail(KelsoClassifiedCropsLess, n=5)
+
+write.csv(KelsoClassifiedCropsLess, file = "Kelso_classified_crops_result_from_LessVariables_Model.csv") 
 
 
 # RANDOM FOREST model - Plots: Actual VS Predicted #### 
@@ -683,7 +825,7 @@ actuals_plot <- ggplot(train, aes(x=LCTYPE)) +
         plot_subtitle + 
         plot_caption + 
         plot_theme
-#actuals_plot
+actuals_plot
 
 # Plot Predicted - modelAll 
 modelAll_plot <- ggplot(test, aes(x=modelAllPredicted)) +
@@ -694,7 +836,7 @@ modelAll_plot <- ggplot(test, aes(x=modelAllPredicted)) +
         plot_subtitle + 
         plot_caption + 
         plot_theme
-#modelAll_plot
+modelAll_plot
 
 # Plot Predicted - modelTopVars 
 modelTopVars_plot <- ggplot(test, aes(x=modelTopVarsPredicted)) +
@@ -705,7 +847,7 @@ modelTopVars_plot <- ggplot(test, aes(x=modelTopVarsPredicted)) +
         plot_subtitle + 
         plot_caption + 
         plot_theme
-#modelTopVars_plot 
+modelTopVars_plot 
 
 # Plot Predicted - modelLessVarsPredicted
 modelLessVars_plot <- ggplot(test, aes(x=modelLessVarsPredicted)) +
@@ -717,7 +859,7 @@ modelLessVars_plot <- ggplot(test, aes(x=modelLessVarsPredicted)) +
         plot_subtitle + 
         plot_caption + 
         plot_theme
-#modelLessVars_plot
+modelLessVars_plot
 
 grid.arrange(actuals_plot, modelAll_plot, modelTopVars_plot, modelLessVars_plot, 
              nrow = 4, ncol = NULL) 
@@ -736,10 +878,28 @@ rfResults <- data.frame(
         Accuracy_train = c(((1-round((modelAll$err.rate[100,1]), 4))*100), 
                            ((1-round((modelTopVars$err.rate[100,1]), 4))*100), 
                            ((1-round((modelLessVars$err.rate[100,1]), 4))*100)), 
-        # Accuracy for TEST model
-        Accuracy_test = c((round((modelAll_Acc), 4)*100), 
-                     (round((modelTopVars_Acc), 4)*100),
-                     (round((modelLessVars_Acc), 4)*100))) 
+        # Accuracy for TEST model 
+        # use FormatC(x,digits=, format="f") to get extra digits in the results 
+        # code: http://r.789695.n4.nabble.com/Printing-2-digits-after-decimal-point-td1555981.html 
+        Accuracy_test = c(
+          (round(modelAll_Acc *100, digits=2)), 
+          (round(modelTopVars_Acc *100, digits=2)), 
+          (round(modelLessVars_Acc *100, digits=2))), 
+        # Kappa stats 
+        Model_Kappa = c(
+          (round(modelAll_conf$overall[2]*100, digits=2)),
+          (round(modelTopVars_conf$overall[2]*100, digits=2)),
+          (round(modelLessVars_conf$overall[2]*100, digits=2)))) 
+
+
+rfResults$Accuracy_test
+
+# Accuracy_test = c(
+#   formatC(modelAll_Acc *100, digits=2, format="f"), 
+#   formatC(modelTopVars_Acc *100, digits=2, format="f"), 
+#   formatC(modelLessVars_Acc *100, digits=2, format="f")))
+
+
 # Print Models Parameters 
 modelParams 
 
@@ -747,7 +907,7 @@ modelParams
 rfResults 
 
 # plot Model variables VS Accuracy (100-ErrorRate :) 
-rfResults_AccuracyTrain_plot <- ggplot(rfResults, aes(x=Variables, y=(Accuracy_train))) + 
+rfResults_AccuracyTrain_plot <- ggplot(rfResults, aes(x=Variables, y=Accuracy_train)) + 
         geom_line(size=1, colour="darkseagreen") + 
         geom_point(size=2, colour="darkseagreen") + 
         geom_text(aes(label=(Accuracy_train)), hjust=0.5, vjust=1.6) + 
@@ -758,10 +918,10 @@ rfResults_AccuracyTrain_plot <- ggplot(rfResults, aes(x=Variables, y=(Accuracy_t
         plot_subtitle + 
         plot_caption + 
         plot_theme
-
+rfResults_AccuracyTrain_plot
 
 # plot Model variables VS Accuracy 
-rfResults_AccuracyTest_plot  <- ggplot(rfResults, aes(x=Variables, y=(Accuracy_test))) + 
+rfResults_AccuracyTest_plot  <- ggplot(rfResults, aes(x=Variables, y=Accuracy_test)) + 
         geom_line(size=1, colour="#6787b7") + 
         geom_point(size=2, colour="#6787b7") + 
         geom_text(aes(label=(Accuracy_test)), hjust=0.5, vjust=1.6) + 
@@ -772,6 +932,7 @@ rfResults_AccuracyTest_plot  <- ggplot(rfResults, aes(x=Variables, y=(Accuracy_t
         plot_subtitle + 
         plot_caption + 
         plot_theme
+rfResults_AccuracyTest_plot
 
 grid.arrange(rfResults_AccuracyTrain_plot, rfResults_AccuracyTest_plot, 
              ncol = NULL) 
