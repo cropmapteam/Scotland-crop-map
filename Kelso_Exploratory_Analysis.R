@@ -36,10 +36,10 @@ library(TeachingDemos)  # for capturing commands and Console output in txt file
 # ==> USER INPUT: SETUP output PDF and TXT files #### 
 
 # create Plots output file (PDF) 
-pdf(file="Kelso_Exploratory_Analysis.pdf")
+#pdf(file="Kelso_Exploratory_Analysis.pdf")
 
 # create console output file (TXT) 
-txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
+#txtStart(file="Kelso_Exploratory_Analysis.txt", commands=TRUE, results=TRUE, append=FALSE) 
 
 
 # BRANDING TEMPLATES: Colors, Emojis, Titles #### 
@@ -115,14 +115,14 @@ table(allData$LCTYPE)
 # table by LCGROUP by LCTYPE 
 table(allData$LCGROUP, allData$LCTYPE) 
 
-# plot by AREA (variale in sq-km)
+# plot by AREA (variale in sq-mtrs)
 # source: https://www.r-bloggers.com/how-to-make-a-histogram-with-ggplot2/ 
 ggplot(allData, aes(x=AREA)) + 
         geom_histogram(breaks=seq(0, 300000, by = 20000), 
                        fill="saddlebrown", 
                        aes(fill=..count..)) + 
         labs(title="Fields by Area Size (AREA)", 
-             x = "Area (in square kilometers)", 
+             x = "Area (in square meters)", 
              y = "Number of farm fields") + 
         plot_subtitle + 
         plot_caption + 
@@ -134,7 +134,7 @@ ggplot(allData, aes(x=AREA)) +
         geom_histogram(aes(y=..density..), fill="saddlebrown", bins=20) +
         geom_density(alpha=.2, fill="#FF6666") + 
         labs(title="Fields by Area Size (AREA)", 
-             x = "Area (in square kilometers)", 
+             x = "Area (in square meters)", 
              y = "Number of farm fields") + 
         plot_subtitle + 
         plot_caption + 
@@ -164,7 +164,7 @@ ggplot(allData, aes(x=LCTYPE)) +
 
 # AREA subsets: Small, Med, Large #### 
 
-# by small AREA ( <= 10000 sq-km)
+# by small AREA ( <= 10000 sq-m)
 table(allData$AREA <= 10000)
 table(allData$LCGROUP, allData$AREA <= 10000) 
 table(allData$LCTYPE, allData$AREA <= 10000) 
@@ -173,7 +173,7 @@ table(allData$LCTYPE, allData$AREA <= 10000)
 ggplot(data=subset(allData, AREA <= 10000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on SMALL fields \n(AREA less than 10,000 sq-km)", 
+        labs(title="Land Cover Group (LCGROUP) on SMALL fields \n(AREA less than 10,000 sq-mtrs)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
@@ -183,7 +183,7 @@ ggplot(data=subset(allData, AREA <= 10000), aes(x=LCGROUP)) +
 ggplot(data=subset(allData, AREA <= 10000), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on SMALL fields \n(AREA less than 10,000 sq-km)", 
+        labs(title="Land Cover Type (LCTYPE) on SMALL fields \n(AREA less than 10,000 sq-mtrs)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -191,7 +191,7 @@ ggplot(data=subset(allData, AREA <= 10000), aes(x=LCTYPE)) +
         plot_theme 
 
 
-# by medium AREA ( > 10,000 and <= 20,000 sq-km)
+# by medium AREA ( > 10,000 and <= 20,000 sq-m)
 table((allData$AREA > 10000) & (allData$AREA < 20000)) 
 table(allData$LCGROUP, ((allData$AREA > 10000) & (allData$AREA < 20000)))
 table(allData$LCTYPE, ((allData$AREA > 10000) & (allData$AREA < 20000)))
@@ -200,7 +200,7 @@ table(allData$LCTYPE, ((allData$AREA > 10000) & (allData$AREA < 20000)))
 ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-km)", 
+        labs(title="Land Cover Group (LCGROUP) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-mtrs)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
@@ -210,7 +210,7 @@ ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCGROUP)) +
 ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-km)", 
+        labs(title="Land Cover Type (LCTYPE) on MEDIUM size fields \n(AREA between 10,000 & 20,000 sq-mtrs)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -218,7 +218,7 @@ ggplot(data=subset(allData, AREA > 10000 & AREA <= 20000), aes(x=LCTYPE)) +
         plot_theme 
 
 
-# by large AREA ( > 20,000 sq-km)
+# by large AREA ( > 20,000 sq-mtrs)
 table(allData$AREA > 20000)
 table(allData$LCGROUP, allData$AREA > 20000) 
 table(allData$LCTYPE, allData$AREA > 20000) 
@@ -227,7 +227,7 @@ table(allData$LCTYPE, allData$AREA > 20000)
 ggplot(data=subset(allData, AREA > 20000), aes(x=LCGROUP)) + 
         geom_histogram(fill="#6787b7", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Group (LCGROUP) on LARGE fields \n(AREA greather than 20,000 sq-km)", 
+        labs(title="Land Cover Group (LCGROUP) on LARGE fields \n(AREA greather than 20,000 sq-mtrs)", 
              x="Land Cover Group (LCGROUP)") + 
         plot_subtitle + 
         plot_caption + 
@@ -237,7 +237,7 @@ ggplot(data=subset(allData, AREA > 20000), aes(x=LCGROUP)) +
 ggplot(data=subset(allData, AREA > 20), aes(x=LCTYPE)) + 
         geom_histogram(fill="darkseagreen", stat="count") + 
         theme(legend.position="top", legend.direction = "horizontal") + 
-        labs(title="Land Cover Type (LCTYPE) on LARGE fields \n(AREA greather than 20,000 sq-km)", 
+        labs(title="Land Cover Type (LCTYPE) on LARGE fields \n(AREA greather than 20,000 sq-mtrs)", 
              x="Land Cover Type (LCTYPE)") + 
         coord_flip() + 
         plot_subtitle + 
@@ -439,7 +439,7 @@ str(meanVHtime)
 vh_mean_plot <- ggplot(data=meanVHtime, aes(x=ind, y=VHmean, colour=LCTYPE )) +
     geom_line() + 
     scale_x_discrete(name = "2018") + 
-    theme(axis.text.x=element_text(angle=90,hjust=1)) +
+#    theme(axis.text.x=element_text(angle=90,hjust=1)) +
     labs(title="VH Mean by Month by Land Cover Type", 
          y = "VH mean") + 
 #  theme(legend.position="bottom", legend.direction = "horizontal") + 
