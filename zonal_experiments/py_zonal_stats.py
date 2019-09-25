@@ -71,6 +71,9 @@ def fetch_zonal_polygons_from_shapefile(shp_fname):
     zonal_polygons = {}
     if os.path.exists(shp_fname):
         with fiona.open(shp_fname, "r") as shp_src:
+            #TODO - check the shapefile has the required fields
+            # do something like this
+            #  if all(i in ["GID", "FID_1", "geometry", "LCGROUP", "LCTYPE"] for i in (shp_src.schema["properties"]).keys()):
             for feature in shp_src:
                 gid = feature["properties"]["GID"]
                 fid_1 = feature["properties"]["FID_1"]
@@ -145,9 +148,10 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
         this_window = Window(aoi_img_min_col, aoi_img_min_row - aoi_height, aoi_width, aoi_height)
         the_window = src.read(band, window=this_window)
 
-        # TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
-        #  possibly unreliable test to check if the returned window is all nodata values i.e. the part of
-        #   the image contains no RS data
+
+        #possibly unreliable test to check if the returned window is all nodata values i.e. the part of
+        #the image contains no RS data
+
         if dbg:
             print("Testing if entire window is nodata for img {}".format(fname))
             print("Window Shape", the_window.shape, the_window.shape[0], the_window.shape[1])
@@ -156,9 +160,16 @@ def fetch_window_from_raster(fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x,
             # this will be the case if the requested window fell completly outside the extent of the image
             window_all_nodata = True
         else:
+            # get the first and last pixel values in the window and test their values
             first = the_window[0][0]
             last = the_window[the_window.shape[0] - 1][the_window.shape[1] - 1]
-            if np.isnan(first) and np.isnan(last):
+            if dbg:
+                print("First: {}, Last: {}".format(first, last))
+            # if first and last pixel values are null or equal to 0, deem window to be nodata
+            # TODO - replace with more robust np.isnan(src.read(1)).all() calls to check entire window for nodata
+            #  however this will be complicated in cases where the window has pixel value 0 which in the S1 data
+            #   seems to be the 'yellow' strip of data which runs round the edge of the scene
+            if (np.isnan(first) or first == 0) and (np.isnan(last) or last == 0):
                 window_all_nodata = True
 
         if dbg:
@@ -203,8 +214,6 @@ def my_variance(x):
     return np.var(x)
 
 
-# TODO write the csv directly in the form that write_data_to_csv_for_ml() provides to avoid writing, reading and then
-#  rewriting the csv
 def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     """
 
@@ -212,16 +221,45 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
     :param zones_shp_fname:
     :return:
     """
-
+    out_data = {}
     gt_polygons = fetch_zonal_polygons_from_shapefile(shp_fname=zones_shp_fname)
     aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y = get_aoi_from_shapefile(zones_shp_fname)
-
-    zs_fname = os.path.join(output_path, (os.path.split(zones_shp_fname)[-1]).replace(".shp", "_zonal_stats.csv"))
+    zs_fname = os.path.join(output_path, (os.path.split(zones_shp_fname)[-1]).replace(".shp", "_zonal_stats_for_ml.csv"))
 
     with open(zs_fname, "w") as outpf:
+        all_dates = []
+        for img_fname in image_metadata:
+            image_day = image_metadata[img_fname][0]
+            image_month = image_metadata[img_fname][1]
+            image_year = image_metadata[img_fname][2]
+            image_date = str(date(int(image_year), int(image_month), int(image_day)))
+            if image_date not in all_dates:
+                all_dates.append(image_date)
+        indexed_all_dates = {}
+
+        # construct header record for the output data
+        idx = 1
+        for i in sorted(all_dates):
+            indexed_all_dates[idx] = i
+            idx += 1
+            header = ["Id", "FID_1", "LCGROUP", "LCTYPE", "AREA"]
+            # band1 is VV
+            # band2 is VH
+            for b in (1, 2):
+                for i in sorted(indexed_all_dates.keys()):
+                    datestamp = indexed_all_dates[i]
+                    if b == 1:
+                        header.append("_".join([datestamp, "VV", "mean"]))
+                        header.append("_".join([datestamp, "VV", "range"]))
+                        header.append("_".join([datestamp, "VV", "variance"]))
+                    if b == 2:
+                        header.append("_".join([datestamp, "VH", "mean"]))
+                        header.append("_".join([datestamp, "VH", "range"]))
+                        header.append("_".join([datestamp, "VH", "variance"]))
+
+        #write the header to the csv
         my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-        my_writer.writerow(
-            ["gt_poly_id", "gt_fid_1", "lcgroup", "lctype", "area", "img_fname", "img_date", "band", "zs_count", "zs_mean", "zs_range", "zs_variance"])
+        my_writer.writerow(header)
 
         # loop through images
         for img_fname in image_metadata:
@@ -230,14 +268,14 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
             image_month = image_metadata[img_fname][1]
             image_year = image_metadata[img_fname][2]
 
-            image_date = date(int(image_year), int(image_month), int(image_day))
+            image_date = str(date(int(image_year), int(image_month), int(image_day)))
 
             this_win_b1, this_affine_b1, window_all_nodata_b1 = fetch_window_from_raster(img_fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=1)
             this_win_b2, this_affine_b2, window_all_nodata_b2 = fetch_window_from_raster(img_fname, aoi_geo_min_x, aoi_geo_min_y, aoi_geo_max_x, aoi_geo_max_y, band=2)
 
             # skip calculating zonal stats for images where the returned window onto the image is all nodata
             if (not window_all_nodata_b1) and (not window_all_nodata_b2):
-                # in each image, loop through gt polygons
+                # in each image window, loop through gt polygons
                 for gid in gt_polygons:
                     gt_poly = gt_polygons[gid]["geom"]
                     gt_poly_area = gt_polygons[gid]["area"]
@@ -245,6 +283,7 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
                     lcgroup = gt_polygons[gid]["lcgroup"]
                     lctype = gt_polygons[gid]["lctype"]
 
+                    # fetch zonal stats for the polygon from band1 of the image window
                     zs_b1 = zonal_stats(
                         gt_poly,
                         this_win_b1,
@@ -253,14 +292,34 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
                         add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
+                    skip = False
 
-                    band = 1
-                    my_writer.writerow([
-                        gid, gt_fid_1, lcgroup, lctype, gt_poly_area, img_fname, image_date, band, zs_b1["count"], zs_b1["mean"], zs_b1["range"], zs_b1["variance"]
-                    ])
+                    # we need to skip cases where the data is like this
+                    if zs_b1["mean"] == "" and zs_b1["range"] == "" and zs_b1["variance"] == "--":
+                        skip = True
 
-                    # fetch zonal stats
-                    # var is variance and is provided by rasterstats user defined statistic
+                    # or this
+                    if zs_b1["mean"] == "0.0" and zs_b1["range"] == "0.0" and zs_b1["variance"] == "0.0":
+                        skip = True
+
+                    # add the zonal stats from band1 to the output data
+                    if not skip:
+                        if gid not in out_data:
+                            out_data[gid] = {
+                                "gt_fid_1": gt_fid_1,
+                                "lcgroup": lcgroup,
+                                "lctype": lctype,
+                                "area": gt_poly_area,
+                                "band_data": {
+                                    1: {},
+                                    2: {}
+                                }
+                            }
+
+                        band_n = 1
+                        out_data[gid]["band_data"][band_n][image_date] = [zs_b1["mean"], zs_b1["range"], zs_b1["variance"]]
+
+                    # fetch zonal stats for the polygon from band2 of the image window
                     zs_b2 = zonal_stats(
                         gt_poly,
                         this_win_b2,
@@ -269,126 +328,67 @@ def generate_zonal_stats(image_metadata, zones_shp_fname, output_path):
                         add_stats={'variance': my_variance},
                         all_touched=False  # include every cell touched by geom or only cells with center within geom
                     )[0]
-
-                    band = 2
-                    my_writer.writerow([
-                        gid, gt_fid_1, lcgroup, lctype, gt_poly_area, img_fname, image_date, band, zs_b2["count"], zs_b2["mean"], zs_b2["range"], zs_b2["variance"]
-                    ])
-            else:
-                print("Skipped {} since window seemed to be all nodata".format(img_fname))
-
-    return zs_fname
-
-
-def write_data_to_csv_for_ml(zs_csv_fname, csv_for_ml_fname):
-    """
-    write the zonal stats to a form that is needed for R
-
-    :param zs_csv_fname:
-    :param csv_for_ml_fname:
-    :return:
-    """
-    all_dates = []
-
-    if os.path.exists(zs_csv_fname):
-        out_data = {}
-        with open(zs_csv_fname, "r") as inpf:
-            my_reader = csv.DictReader(inpf)
-            for r in my_reader:
-                zs_count = r["zs_count"]
-                if zs_count != 0:
-                    gt_poly_id = int(r["gt_poly_id"])
-                    gt_fid_1 = r["gt_fid_1"]
-                    lcgroup = r["lcgroup"]
-                    lctype = r["lctype"]
-                    area = r["area"]
-                    band = r["band"]
-                    zs_mean = r["zs_mean"]
-                    zs_range = r["zs_range"]
-                    zs_variance = r["zs_variance"]
-                    img_date = r["img_date"]
-                    if img_date not in all_dates:
-                        all_dates.append(img_date)
-
                     skip = False
 
                     # we need to skip cases where the data is like this
-                    if zs_mean == "" and zs_range == "" and zs_variance == "--":
+                    if zs_b2["mean"] == "" and zs_b2["range"] == "" and zs_b2["variance"] == "--":
                         skip = True
 
                     # or this
-                    if zs_mean == "0.0" and zs_range == "0.0" and zs_variance == "0.0":
+                    if zs_b2["mean"] == "0.0" and zs_b2["range"] == "0.0" and zs_b2["variance"] == "0.0":
                         skip = True
 
+                    # add the zonal stats from band2 to the output data
                     if not skip:
-                        if gt_poly_id not in out_data:
-                            out_data[gt_poly_id] = {
+                        if gid not in out_data:
+                            out_data[gid] = {
                                 "gt_fid_1": gt_fid_1,
                                 "lcgroup": lcgroup,
                                 "lctype": lctype,
-                                "area": area,
+                                "area": gt_poly_area,
                                 "band_data": {
                                     1: {},
                                     2: {}
                                 }
                             }
 
-                        out_data[gt_poly_id]["band_data"][int(band)][img_date] = [zs_mean, zs_range, zs_variance]
+                        band_n = 2
+                        out_data[gid]["band_data"][band_n][image_date] = [zs_b2["mean"], zs_b2["range"], zs_b2["variance"]]
+            else:
+                print("Skipped {} since window seemed to be all nodata".format(img_fname))
 
-        indexed_all_dates = {}
-        idx = 1
-        for i in sorted(all_dates):
-            indexed_all_dates[idx] = i
-            idx += 1
+        # write out all the output data to the csv
+        for gt_poly_id in sorted(out_data.keys()):
+            ml_data = [gt_poly_id]
+            fid_1 = out_data[gt_poly_id]["gt_fid_1"]
+            ml_data.append(fid_1)
 
-        header = ["Id", "FID_1", "LCGROUP", "LCTYPE", "AREA"]
-        # band1 is VV
-        # band2 is VH
-        for b in (1, 2):
-            for i in sorted(indexed_all_dates.keys()):
-                datestamp = indexed_all_dates[i]
-                if b == 1:
-                    header.append("_".join([datestamp, "VV", "mean"]))
-                    header.append("_".join([datestamp, "VV", "range"]))
-                    header.append("_".join([datestamp, "VV", "variance"]))
-                if b == 2:
-                    header.append("_".join([datestamp, "VH", "mean"]))
-                    header.append("_".join([datestamp, "VH", "range"]))
-                    header.append("_".join([datestamp, "VH", "variance"]))
+            lcgroup = out_data[gt_poly_id]["lcgroup"]
+            ml_data.append(lcgroup)
 
-        with open(csv_for_ml_fname, "w") as outpf:
-            my_writer = csv.writer(outpf, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-            my_writer.writerow(header)
+            lctype = out_data[gt_poly_id]["lctype"]
+            ml_data.append(lctype)
 
-            for gt_poly_id in sorted(out_data.keys()):
-                ml_data = [gt_poly_id]
-                fid_1 = out_data[gt_poly_id]["gt_fid_1"]
-                ml_data.append(fid_1)
+            area = out_data[gt_poly_id]["area"]
+            ml_data.append(area)
 
-                lcgroup = out_data[gt_poly_id]["lcgroup"]
-                ml_data.append(lcgroup)
+            for b in (1, 2):
+                band_data = out_data[gt_poly_id]["band_data"][b]
+                for i in sorted(indexed_all_dates.keys()):
+                    datestamp = indexed_all_dates[i]
+                    zs_mean = None
+                    zs_range = None
+                    zs_variance = None
+                    if datestamp in band_data:
+                        zs_mean = band_data[datestamp][0]
+                        zs_range = band_data[datestamp][1]
+                        zs_variance = band_data[datestamp][2]
+                    ml_data.append(zs_mean)
+                    ml_data.append(zs_range)
+                    ml_data.append(zs_variance)
+            my_writer.writerow(ml_data)
 
-                lctype = out_data[gt_poly_id]["lctype"]
-                ml_data.append(lctype)
-
-                area = out_data[gt_poly_id]["area"]
-                ml_data.append(area)
-
-                for b in (1, 2):
-                    band_data = out_data[gt_poly_id]["band_data"][b]
-                    for i in sorted(indexed_all_dates.keys()):
-                        datestamp = indexed_all_dates[i]
-                        zs_mean = None
-                        zs_range = None
-                        zs_variance = None
-                        if datestamp in band_data:
-                            zs_mean = band_data[datestamp][0]
-                            zs_range = band_data[datestamp][1]
-                            zs_variance = band_data[datestamp][2]
-                        ml_data.append(zs_mean)
-                        ml_data.append(zs_range)
-                        ml_data.append(zs_variance)
-                my_writer.writerow(ml_data)
+    return zs_fname
 
 
 @click.command()
@@ -401,12 +401,7 @@ def fetch_zonal_stats_for_shapefile(zones_shp_fname, image_metadata_fname, outpu
 
     # generate zonal stats
     print("[1] generating zonal stats for {}".format(zones_shp_fname))
-    zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
-
-    # reformat the zonal stats csv into the form needed for R
-    print("[2] reformatting zonal stats to csv form needed for R")
-    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
-    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
+    generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
 
 
 def mp_fetch_zonal_stats_for_shapefile(job_params):
@@ -427,12 +422,7 @@ def mp_fetch_zonal_stats_for_shapefile(job_params):
 
     # generate zonal stats
     print("[1] generating zonal stats for {}".format(zones_shp_fname))
-    zs_fname = generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
-
-    # reformat the zonal stats csv into the form needed for R
-    print("[2] reformatting zonal stats to csv form needed for R")
-    csv_for_ml_fname = zs_fname.replace(".csv", "_for_ml.csv")
-    write_data_to_csv_for_ml(zs_fname, csv_for_ml_fname)
+    generate_zonal_stats(image_metadata, zones_shp_fname, output_path)
 
 
 if __name__ == "__main__":
